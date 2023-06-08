@@ -18,7 +18,7 @@ local need_download = false
 for _, file in ipairs(required_files) do if not fs.exists(pd_file(file)) then need_download = true break end end
 if need_download then
   local ok, err = pcall(function() require "fatlibs" (table.unpack(required_files)) end)
-  if not ok then error(("Failed to install dependencies: %s"):format(err)) end
+  if not ok then error(("Failed to install dependencies: %s"):format(err), 0) end
 end
 --[[ ################  END INSTALLER  ################ ]]
 ```
