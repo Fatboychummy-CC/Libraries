@@ -3,14 +3,14 @@ local _expect = require "cc.expect"
 local field, expect = _expect.field, _expect.expect
 
 ---@class edges
----@field TOP char_data
----@field BOT char_data
----@field LEFT char_data
----@field RIGHT char_data
----@field CORNER_TL char_data
----@field CORNER_TR char_data
----@field CORNER_BR char_data
----@field CORNER_BL char_data
+---@field TOP button-char_data
+---@field BOT button-char_data
+---@field LEFT button-char_data
+---@field RIGHT button-char_data
+---@field CORNER_TL button-char_data
+---@field CORNER_TR button-char_data
+---@field CORNER_BR button-char_data
+---@field CORNER_BL button-char_data
 local EDGES = {}
 do
   local function add_edge(name)
@@ -51,7 +51,7 @@ local BLIT_CONVERT = {
 }
 
 local Button = {
-  _buttons = {} ---@type table<integer, button>
+  _buttons = {} ---@type table<integer, button-button>
 }
 
 local function check_buttons(x, y)
@@ -71,8 +71,8 @@ local function unhold_all()
 end
 
 --- Create a new button.
----@param options button_options
----@return button
+---@param options button-button_options
+---@return button-button
 function Button.new(options)
   expect(1, options, "table")
   field(options, "x", "number")
@@ -120,17 +120,11 @@ function Button.new(options)
     holding = false,
     drawn = true,
     enabled = true
-  } --[[@as button]]
+  } --[[@as button-button]]
 
   table.insert(Button._buttons, btn)
 
   return btn
-end
-
---- Build a line of text tables into a string.
----@param line table<integer, string>
-local function build_line(line)
-
 end
 
 --- Draw all buttons.
