@@ -103,4 +103,29 @@ function dutil.high_fidelity_percent_bar(options)
   return bar --[[@as display_utils-hfpb]]
 end
 
+--- Write text centered at the given position, or centered on the current terminal line.
+---@param text string The text to be written.
+---@param x integer? The x position to write at.
+---@param y integer? The y position to write at.
+function dutil.write_centered(text, x, y)
+  expect(1, text, "string")
+  if x then
+    expect(2, x, "number")
+    expect(3, y, "number")
+  end
+
+
+  if not x then
+    local w = term.getSize()
+    local _, _y = term.getCursorPos()
+    y = _y
+    x = w / 2 -- Don't round here - we may add up .5 and .5 later.
+  end
+  ---@cast y number Confirmed a number at this point.
+
+  local start_x = math.ceil(x - #text / 2)
+  term.setCursorPos(start_x, y)
+  term.write(text)
+end
+
 return dutil
