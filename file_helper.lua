@@ -1,20 +1,22 @@
 local QIT = require "QIT"
 
 ---@class file_helper
-local file = {}
+local file = {
+  working_directory = fs.getDir(shell.getRunningProgram())
+}
 
 --- Return a table of lines from a file.
 ---@param filename string The file to be read.
 ---@param default string[]? The value returned when the file does not exist.
 ---@return string[] lines
-function file.getLines(filename, default)
+function file.get_lines(filename, default)
   local lines = QIT()
 
-  if not fs.exists(filename) then
+  if not fs.exists(fs.combine(file.working_directory, filename)) then
     return default or {}
   end
 
-  for line in io.lines(filename) do
+  for line in io.lines(fs.combine(file.working_directory, filename)) do
     lines:Insert(line)
   end
 
@@ -25,8 +27,8 @@ end
 ---@param filename string The file to be read.
 ---@param default string? The value returned when the file does not exist.
 ---@return string data
-function file.getAll(filename, default)
-  local h = io.open(filename, 'r')
+function file.get_all(filename, default)
+  local h = io.open(fs.combine(file.working_directory, filename), 'r')
 
   if not h then
     return default or ""
@@ -42,7 +44,7 @@ end
 ---@param filename string The file to write to.
 ---@param data string The data to write.
 function file.write(filename, data)
-  local h, err = io.open(filename, 'w')
+  local h, err = io.open(fs.combine(file.working_directory, filename), 'w')
 
   if not h then
     error(("Failed to open '%s' for writing."):format(err), 2)
@@ -56,7 +58,7 @@ end
 ---@param default any The value returned when th e file does not exist.
 ---@return any data
 function file.unserialize(filename, default)
-  local h = io.open(filename, 'r')
+  local h = io.open(fs.combine(file.working_directory, filename), 'r')
 
   if not h then
     return default or ""
@@ -72,7 +74,7 @@ end
 ---@param filename string The file to write to.
 ---@param data any The data to write, this will be serialized.
 function file.serialize(filename, data)
-  local h, err = io.open(filename, 'w')
+  local h, err = io.open(fs.combine(file.working_directory, filename), 'w')
 
   if not h then
     error(("Failed to open '%s' for writing."):format(err), 2)
