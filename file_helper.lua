@@ -47,7 +47,7 @@ function file.write(filename, data)
   local h, err = io.open(fs.combine(file.working_directory, filename), 'w')
 
   if not h then
-    error(("Failed to open '%s' for writing."):format(err), 2)
+    error(("Failed to open '%s' for writing: %s"):format(fs.combine(file.working_directory, filename), err), 2)
   end
 
   h:write(data):close()
@@ -77,7 +77,7 @@ function file.serialize(filename, data)
   local h, err = io.open(fs.combine(file.working_directory, filename), 'w')
 
   if not h then
-    error(("Failed to open '%s' for writing."):format(err), 2)
+    error(("Failed to open '%s' for writing: %s"):format(fs.combine(file.working_directory, filename), err), 2)
   end
 
   h:write(textutils.serialize(data)):close()
