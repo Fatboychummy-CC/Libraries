@@ -42,7 +42,7 @@ local function get(...)
 
     local extern_file, extern_url = remote:match("^extern:(.-):(.+)$")
     local paste_file, paste = remote:match("^paste:(.-):(.+)$")
-    local remote_file, local_file = remote:match("^(.-):(.+)$")
+    local local_file, remote_file = remote:match("^(.-):(.+)$")
 
     if extern_file then
       -- downlaod from external location
@@ -51,7 +51,7 @@ local function get(...)
       -- download from pastebin
       local cb = ("%x"):format(math.random(0, 1000000))
       download_file(PASTE_URL .. textutils.urlEncode(paste) .. "?cb=" .. cb, paste_file)
-    elseif remote_file then
+    elseif local_file then
       -- download from main repository.
       download_file(RAW_URL .. remote_file, local_file)
     else
