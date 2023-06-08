@@ -21,7 +21,7 @@
 ---@field bar_color color The color to set the bar if one is set to be drawn.
 ---@field highlight_bar_color color The bar color when the mouse is held down on the button.
 
----@class button-button
+---@class button-button_object
 ---@field x integer The X position of the button.
 ---@field y integer The Y position of the button.
 ---@field w integer The width of the button.

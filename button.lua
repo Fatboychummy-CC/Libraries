@@ -50,8 +50,9 @@ local BLIT_CONVERT = {
   [32768] = 'f',
 }
 
+---@class button-button
 local Button = {
-  _buttons = {} ---@type table<integer, button-button>
+  _buttons = {} ---@type table<integer, button-button_object>
 }
 
 local function check_buttons(x, y)
@@ -72,7 +73,7 @@ end
 
 --- Create a new button.
 ---@param options button-button_options
----@return button-button
+---@return button-button_object
 function Button.new(options)
   expect(1, options, "table")
   field(options, "x", "number")
@@ -120,7 +121,7 @@ function Button.new(options)
     holding = false,
     drawn = true,
     enabled = true
-  } --[[@as button-button]]
+  } --[[@as button-button_object]]
 
   table.insert(Button._buttons, btn)
 
