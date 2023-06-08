@@ -1,5 +1,3 @@
-local QIT = require "QIT"
-
 ---@class file_helper
 local file = {
   working_directory = fs.getDir(shell.getRunningProgram())
@@ -10,17 +8,18 @@ local file = {
 ---@param default string[]? The value returned when the file does not exist.
 ---@return string[] lines
 function file.get_lines(filename, default)
-  local lines = QIT()
+  local lines = {}
 
   if not fs.exists(fs.combine(file.working_directory, filename)) then
     return default or {}
   end
 
   for line in io.lines(fs.combine(file.working_directory, filename)) do
-    lines:Insert(line)
+    table.insert(lines, line)
   end
+  lines.n = #lines
 
-  return lines:Clean()
+  return lines
 end
 
 --- Return a string containing the entirety of the file read.
