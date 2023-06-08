@@ -65,7 +65,7 @@ if p_dir:match("^rom") then
   error("Attempting to install to the ROM. Please rerun but add arguments for install location (or run the installer script in the folder you wish to install to).", 0)
 end
 
-write(("Going to install to:\n  %s\n\nIs this where you want it to be installed? (y/n): "):format(fs.combine(p_dir, "*")))
+write(("Going to install to:\n  /%s\n\nIs this where you want it to be installed? (y/n): "):format(fs.combine(p_dir, "*")))
 
 local key
 repeat
