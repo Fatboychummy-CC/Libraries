@@ -10,7 +10,7 @@
 ---@field txt_color color The text color of the button.
 ---@field highlight_bg_color color The background color of the button when the mouse is held down on it.
 ---@field highlight_txt_color color The text color of the button when the mouse is held down on it.
----@field callback fun() The callback to use when this button is pressed.
+---@field callback fun(self:button-button_object) The callback to use when this button is pressed.
 ---@field text_centered boolean? If the text should be centered. Otherwise it is at the top-left of the object.
 ---@field text_offset_x integer? If the text is not centered, offset the text by this much on the X axis.
 ---@field text_offset_y integer? If the text is not centered, offset the text by this much on the Y axis.
@@ -29,7 +29,7 @@
 ---@field text string The text to be displayed on the button.
 ---@field bg_color color The background color of the button.
 ---@field txt_color color The text color of the button.
----@field callback fun() The callback to use when this button is pressed.
+---@field callback fun(self:button-button_object) The callback to use when this button is pressed.
 ---@field text_centered boolean If the text should be centered. Otherwise it is at the top-left of the object.
 ---@field text_offset_x integer If the text is not centered, offset the text by this much on the X axis.
 ---@field text_offset_y integer If the text is not centered, offset the text by this much on the Y axis.

@@ -282,7 +282,7 @@ function Button.set()
       elseif event == "mouse_up" then
         local button = check_buttons(x, y)
         if button and button.holding then
-          button.callback()
+          button.callback(button)
         end
         unhold_all()
       end
