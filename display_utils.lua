@@ -103,6 +103,22 @@ function dutil.high_fidelity_percent_bar(options)
   return bar --[[@as display_utils-hfpb]]
 end
 
+--- Create a box filled with color.
+---@param x integer The X position of the top left of the box.
+---@param y integer The Y position of the top left of the box.
+---@param w integer The width of the box.
+---@param h integer The height of the box.
+---@param color color The color of the box.
+function dutil.fast_box(x, y, w, h, color)
+  local txt = (' '):rep(w)
+  local fg = ('f'):rep(w)
+  local bg = BLIT_CONVERT[color]:rep(w)
+  for _y = y, y + h - 1 do
+    term.setCursorPos(x, _y)
+    term.blit(txt, fg, bg)
+  end
+end
+
 --- Write text centered at the given position, or centered on the current terminal line.
 ---@param text string The text to be written.
 ---@param x integer? The x position to write at.
