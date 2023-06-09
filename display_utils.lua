@@ -110,7 +110,7 @@ end
 ---@param h integer The height of the box.
 ---@param color color The color of the box.
 ---@param char string? The character to be drawn. Defaults to a space.
----@param text_color color The text color to be used (useful if using `char`).
+---@param text_color color? The text color to be used (useful if using `char`).
 function dutil.fast_box(x, y, w, h, color, char, text_color)
   expect(1, x, "number")
   expect(2, y, "number")
