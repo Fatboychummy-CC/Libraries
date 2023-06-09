@@ -109,9 +109,19 @@ end
 ---@param w integer The width of the box.
 ---@param h integer The height of the box.
 ---@param color color The color of the box.
-function dutil.fast_box(x, y, w, h, color)
-  local txt = (' '):rep(w)
-  local fg = ('f'):rep(w)
+---@param char string? The character to be drawn. Defaults to a space.
+---@param text_color color The text color to be used (useful if using `char`).
+function dutil.fast_box(x, y, w, h, color, char, text_color)
+  expect(1, x, "number")
+  expect(2, y, "number")
+  expect(3, w, "number")
+  expect(4, h, "number")
+  expect(5, color, "number")
+  expect(6, char, "string", "nil")
+  expect(7, text_color, "number", "nil")
+
+  local txt = (char or ' '):rep(w)
+  local fg = (text_color and BLIT_CONVERT[text_color] or 'f'):rep(w)
   local bg = BLIT_CONVERT[color]:rep(w)
   for _y = y, y + h - 1 do
     term.setCursorPos(x, _y)
