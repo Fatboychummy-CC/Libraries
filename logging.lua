@@ -122,7 +122,7 @@ end
 --- Set the display level of the log. Log entries that are below this value will not be logged.
 ---@param level logging-log_level The log level.
 function logging.set_level(level)
-  expect(1, level, "string")
+  expect(1, level, "number")
 
   log_level = level
 end
