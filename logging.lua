@@ -24,12 +24,26 @@ local log_file_formatter = "[%s][%s] %s"
 local log_formatter = "[%s][%s] "
 local level_text_formatter = "0%s00%s00"
 
-local function blit_print(text, text_color, back_color, printed)
-  local _, h = 
+local function blit_print(text, text_color, back_color, printed, level)
   log_window.blit(text, text_color, back_color)
+  local _, h = log_window.getSize()
+  local _, y = log_window.getCursorPos()
+  if y >= h then
+    log_window.scroll(1)
+    log_window.setCursorPos(1, y)
+  else
+    log_window.setCursorPos(1, y + 1)
+  end
 
   local old = term.redirect(log_window)
+  local old_c = term.getTextColor()
+  term.setTextColor(
+    level == logging.LOG_LEVEL.WARN and colors.orange
+      or level == logging.LOG_LEVEL.ERROR and colors.red
+      or colors.white
+  )
   print(printed)
+  term.setTextColor(old_c)
   term.redirect(old)
 end
 
@@ -70,7 +84,8 @@ local function log(context, level, level_name, ...)
         t_color:rep(#level_name), t_color:rep(#context)
       ),
       ('f'):rep(#text),
-      combined
+      combined,
+      level
     )
   end
 end
