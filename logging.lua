@@ -26,14 +26,6 @@ local level_text_formatter = "0%s00%s00"
 
 local function blit_print(text, text_color, back_color, printed, level)
   log_window.blit(text, text_color, back_color)
-  local _, h = log_window.getSize()
-  local _, y = log_window.getCursorPos()
-  if y >= h then
-    log_window.scroll(1)
-    log_window.setCursorPos(1, y)
-  else
-    log_window.setCursorPos(1, y + 1)
-  end
 
   local old = term.redirect(log_window)
   local old_c = term.getTextColor()
