@@ -231,12 +231,13 @@ function Button.set()
       end
 
       local i = 0
-      for x = start_x, start_x + #button.text - 1 do
+      local text = #button.text > button.w and button.text:sub(1, button.w - 3) .. "..." or button.text
+      for x = start_x, start_x + #text - 1 do
         i = i + 1
-        if x >= 1 and x < button.w then
-          txt[text_y][x] = button.text:sub(i, i)
+        if x >= 1 and x <= button.w then
+          txt[text_y][x] = text:sub(i, i)
         else
-          error("out of range")
+          error(("Button attempted drawing outside of its space: %.2f %.2f"):format(text_y, x))
         end
       end
 
