@@ -1,4 +1,5 @@
 --- Quick and dirty button library with some slight fanciness.
+local strings = require "cc.strings"
 local _expect = require "cc.expect"
 local field, expect = _expect.field, _expect.expect
 
@@ -130,6 +131,119 @@ function Button.set()
     } --[[@as button-button_object]]
 
     table.insert(set._buttons, btn)
+
+    return btn
+  end
+
+  function set.input_box(options)
+    expect(1, options, "table")
+    field(options, "x", "number")
+    field(options, "y", "number")
+    field(options, "w", "number")
+    field(options, "h", "nil")
+    field(options, "text", "string")
+    field(options, "bg_color", "number")
+    field(options, "txt_color", "number")
+    field(options, "highlight_txt_color", "number")
+    field(options, "highlight_bg_color", "number")
+    field(options, "callback", "function")
+    field(options, "verification_callback", "function")
+    field(options, "info_x", "number")
+    field(options, "info_y", "number")
+    field(options, "info_w", "number")
+    field(options, "info_h", "number")
+    field(options, "info_bg_color", "number")
+    field(options, "info_txt_color", "number")
+    field(options, "info_text", "string")
+
+    local callback_proxy = {}
+
+    local function wrapper(f)
+      --- Callback wrapper
+      ---@param self button-button_input_field
+      return function(self, ...)
+        -- Handle user input here!
+        local input_win = window.create(term.current(), self.x, self.y, self.w + 1, 1, false)
+        local info_win = window.create(term.current(), self.info_x, self.info_y, self.info_w, self.info_h, false)
+
+        input_win.setBackgroundColor(self.highlight_bg_color)
+        info_win.setBackgroundColor(self.info_bg_color)
+
+        input_win.setTextColor(self.highlight_txt_color)
+        info_win.setTextColor(self.info_txt_color)
+
+        input_win.clear()
+        info_win.clear()
+
+        local text = strings.wrap(self.info_text, self.info_w)
+        for i, str in ipairs(text) do
+          info_win.setCursorPos(1, i)
+          info_win.write(str)
+        end
+
+        input_win.setVisible(true)
+        info_win.setVisible(true)
+
+        local old = term.redirect(input_win)
+
+        -- pcall this to protect the old terminal object.
+        local ok, err = pcall(function()
+          local result, reason
+          while true do
+            input_win.clear()
+            input_win.setCursorPos(1, 1)
+
+            ---@diagnostic disable-next-line These are completely valid nils
+            result, reason = self.verification_callback(read(nil, nil, nil, self.text:match("^%s*(.-)%s*$")))
+
+            if result ~= nil then -- allow `false` to be an output.
+              break
+            elseif reason then
+              -- Bad result!
+              local b_text = strings.wrap(reason, self.info_w)
+              info_win.setTextColor(colors.red)
+              info_win.clear()
+              for i, str in ipairs(b_text) do
+                info_win.setCursorPos(1, i)
+                info_win.write(str)
+              end
+            end
+          end
+          self.result = result
+        end)
+        term.redirect(old)
+
+        if not ok then
+          error(err, 0)
+        end
+
+        return f(self, ...)
+      end
+    end
+
+    options.h = 1
+
+    local btn = setmetatable(
+      set.new(options),
+      {
+        __index = callback_proxy,
+        __newindex = function(self, index, value)
+          callback_proxy[index] = value
+        end
+      }
+    )
+
+    btn.info_x = options.info_x
+    btn.info_y = options.info_y
+    btn.info_w = options.info_w
+    btn.info_h = options.info_h
+    btn.info_bg_color = options.info_bg_color
+    btn.info_txt_color = options.info_txt_color
+    btn.info_text = options.info_text
+    btn.verification_callback = options.verification_callback
+
+    callback_proxy.callback = wrapper(options.callback)
+    btn.callback = nil
 
     return btn
   end
