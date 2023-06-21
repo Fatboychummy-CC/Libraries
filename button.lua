@@ -155,6 +155,8 @@ function Button.set()
     field(options, "info_bg_color", "number")
     field(options, "info_txt_color", "number")
     field(options, "info_text", "string")
+    field(options, "default_text", "string", "nil")
+    field(options, "password_field", "boolean", "nil")
 
     local callback_proxy = {}
 
@@ -175,37 +177,57 @@ function Button.set()
         input_win.clear()
         info_win.clear()
 
-        local text = strings.wrap(self.info_text, self.info_w)
-        for i, str in ipairs(text) do
-          info_win.setCursorPos(1, i)
-          info_win.write(str)
-        end
-
         input_win.setVisible(true)
         info_win.setVisible(true)
+
+        local function write_info(reason, color)
+          local b_text = strings.wrap(reason, self.info_w)
+          info_win.setTextColor(color)
+          info_win.clear()
+          for i, str in ipairs(b_text) do
+            info_win.setCursorPos(1, i)
+            info_win.write(str)
+          end
+        end
+
+        write_info(self.info_text, colors.white)
 
         local old = term.redirect(input_win)
 
         -- pcall this to protect the old terminal object.
         local ok, err = pcall(function()
           local result, reason
+          local previous
           while true do
             input_win.clear()
             input_win.setCursorPos(1, 1)
 
             ---@diagnostic disable-next-line These are completely valid nils
-            result, reason = self.verification_callback(read(nil, nil, nil, self.text:match("^%s*(.-)%s*$")))
+            result, reason = self.verification_callback(read(self.password_field and "\x07" or nil, nil, nil, self.default_text))
 
-            if result ~= nil then -- allow `false` to be an output.
-              break
-            elseif reason then
-              -- Bad result!
-              local b_text = strings.wrap(reason, self.info_w)
-              info_win.setTextColor(colors.red)
-              info_win.clear()
-              for i, str in ipairs(b_text) do
-                info_win.setCursorPos(1, i)
-                info_win.write(str)
+            if self.password_field then
+              if result ~= nil then
+                if previous then
+                  if previous == result then
+                    break -- Passwords good!
+                  else
+                    write_info("Passwords did not match. Please retry.", colors.red)
+                    previous = nil
+                  end
+                else
+                  previous = result
+                  write_info("Please confirm the encryption key.", colors.yellow)
+                end
+              elseif reason then
+                write_info(reason, colors.red)
+                previous = nil
+              end
+            else
+              if result ~= nil then -- allow `false` to be an output.
+                break
+              elseif reason then
+                -- Bad result!
+                write_info(reason, colors.red)
               end
             end
           end
@@ -241,11 +263,13 @@ function Button.set()
     btn.info_txt_color = options.info_txt_color
     btn.info_text = options.info_text
     btn.verification_callback = options.verification_callback
+    btn.default_text = options.default_text
+    btn.password_field = options.password_field
 
     callback_proxy.callback = wrapper(options.callback)
     btn.callback = nil
 
-    return btn
+    return btn --[[@as button-button_input_field]]
   end
 
   --- Draw all buttons.
@@ -387,6 +411,8 @@ function Button.set()
       error("Button event handler was passed a nil event.", 2)
     end
 
+    local hit = false
+
     if mouse_button == 1 then -- we haven't checked if it's a mouse event yet but this should be fine.
       if event == "mouse_click" then
         unhold_all()
@@ -398,10 +424,13 @@ function Button.set()
         local button = check_buttons(x, y)
         if button and button.holding then
           button.callback(button)
+          hit = true
         end
         unhold_all()
       end
     end
+
+    return hit
   end
 
   return set

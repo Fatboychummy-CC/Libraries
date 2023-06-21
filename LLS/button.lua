@@ -53,6 +53,8 @@
 ---@field info_txt_color number The text color of the information box.
 ---@field info_text string The text of the information box.
 ---@field result any The resultant value after running the input box. This will be set right before the callback is ran, and will be available in the callback.
+---@field default_text string? The default text to use when writing to this input field.
+---@field password_field boolean? If this input is a password field. Censors the input and requires input twice.
 
 ---@class button-char_data
 ---@field char string The character to use.
