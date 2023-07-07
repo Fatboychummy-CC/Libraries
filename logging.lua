@@ -8,7 +8,8 @@ local logging = {
     DEBUG = 0,
     INFO = 1,
     WARN = 2,
-    ERROR = 3
+    ERROR = 3,
+    FATAL = 4
   }
 }
 local errored = false
@@ -67,8 +68,9 @@ local function log(context, level, level_name, ...)
     local t_color = level == logging.LOG_LEVEL.DEBUG and '8' -- light gray
       or level == logging.LOG_LEVEL.INFO and '0' -- white
       or level == logging.LOG_LEVEL.WARN and '4' -- yellow
-      or level == logging.LOG_LEVEL.ERROR and 'e' -- red
-      or '1' -- orange
+      or level == logging.LOG_LEVEL.ERROR and '1' -- orange
+      or level == logging.LOG_LEVEL.FATAL and 'e' -- red
+      or '6' -- pink
 
     blit_print(
       text,
@@ -121,6 +123,10 @@ function logging.create_context(name)
   ---@param ... any The values to be included in the log. Concatenated with a space.
   function context.error(...)
     log(name, logging.LOG_LEVEL.ERROR, "ERROR", ...)
+  end
+
+  function context.fatal(...)
+    log(name, logging.LOG_LEVEL.FATAL, "FATAL", ...)
   end
 
   return setmetatable(context, logging)
