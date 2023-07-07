@@ -8,11 +8,20 @@ local last_ref = 0
 ---@param ... integer The channels to listen on.
 ---@return namespace namespace The communication namespace.
 function comms.namespace(name, ...)
+  expect(1, name, "string")
   ---@class namespace
   local namespace = {}
   local mt = {__index = namespace}
 
-  local channels = table.pack(...)
+  local args = table.pack(...)
+  if args.n == 0 then
+    error("Expected at least one channel.")
+  end
+  for i = 1, args.n do
+    expect(i + 1, args[i], "number")
+  end
+
+  local channels = args
 
   local identifier = math.random(0, 2^31 - 2)
   local modem ---@type Modem?
@@ -25,6 +34,10 @@ function comms.namespace(name, ...)
   ---@return packet packet The packet to be sent.
   ---@nodiscard I mean, unless you want to create it and immediately get rid of it...?
   function namespace.new_packet(payload, response_ref, identifier_ref)
+    expect(1, payload, "table")
+    expect(2, response_ref, "number", "nil")
+    expect(3, identifier_ref, "number", "nil")
+
     last_ref = last_ref + 1 
     return setmetatable({
       protocol = name,
@@ -43,6 +56,8 @@ function comms.namespace(name, ...)
   ---@return packet response The response packet.
   ---@nodiscard I mean, unless you want to create it and immediately get rid of it...?
   function namespace.new_response(packet, payload)
+    expect(1, packet, "table")
+
     return setmetatable(namespace.new_packet(payload, packet.ref, packet.identifier), mt) --[[@as packet]]
   end
 
@@ -50,6 +65,9 @@ function comms.namespace(name, ...)
   ---@param packet packet The packet to send.
   ---@param channel integer The channel to send on.
   function namespace.send_packet(packet, channel)
+    expect(1, packet, "table")
+    expect(2, channel, "number")
+
     if not modem then
       error("Modem is not set.", 2)
     end
@@ -61,6 +79,7 @@ function comms.namespace(name, ...)
   ---@param _modem Modem|string The modem to use.
   function namespace.set_modem(_modem)
     expect(1, _modem, "table", "string")
+
     if type(_modem) == "string" then
       _modem = peripheral.wrap(_modem) --[[@as Modem]]
     end
@@ -104,6 +123,33 @@ function comms.namespace(name, ...)
         return data --[[@as packet]]
       end
     end
+  end
+
+  function namespace.set_channels(...)
+    local args = table.pack(...)
+    if args.n == 0 then
+      error("Expected at least one channel.")
+    end
+    for i = 1, args.n do
+      expect(i, args[i], "number")
+    end
+    
+    if modem then
+      for i = 1, channels.n do
+        modem.close(channels[i])
+      end
+      for i = 1, args.n do
+        modem.open(args[i])
+      end
+    end
+      
+    channels = args
+  end
+
+  --- Returns the name of the modem.
+  ---@return string? modem_id The modem's name.
+  function namespace.get_modem_name()
+    return modem_id
   end
 
   return namespace
