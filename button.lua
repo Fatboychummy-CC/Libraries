@@ -157,6 +157,7 @@ function Button.set()
     field(options, "info_text", "string")
     field(options, "default_text", "string", "nil")
     field(options, "password_field", "boolean", "nil")
+    field(options, "password_input_field", "boolean", "nil")
 
     local callback_proxy = {}
 
@@ -203,20 +204,25 @@ function Button.set()
             input_win.setCursorPos(1, 1)
 
             ---@diagnostic disable-next-line These are completely valid nils
-            result, reason = self.verification_callback(read(self.password_field and "\x07" or nil, nil, nil, self.default_text))
+            result, reason = self.verification_callback(read((self.password_field or self.password_input_field) and "\x07" or nil, nil, nil, self.default_text))
 
-            if self.password_field then
+            if self.password_field or self.password_input_field then
               if result ~= nil then
+                if self.password_input_field then
+                  -- This is a password input field, not a password set field.
+                  -- Only prompt the user once.
+                  break
+                end
                 if previous then
                   if previous == result then
                     break -- Passwords good!
                   else
-                    write_info("Passwords did not match. Please retry.", colors.red)
+                    write_info("Inputs did not match. Please retry.", colors.red)
                     previous = nil
                   end
                 else
                   previous = result
-                  write_info("Please confirm the encryption key.", colors.yellow)
+                  write_info("Please confirm.", colors.yellow)
                 end
               elseif reason then
                 write_info(reason, colors.red)
@@ -233,6 +239,7 @@ function Button.set()
           end
           self.result = result
         end)
+
         term.redirect(old)
 
         if not ok then
@@ -265,6 +272,7 @@ function Button.set()
     btn.verification_callback = options.verification_callback
     btn.default_text = options.default_text
     btn.password_field = options.password_field
+    btn.password_input_field = options.password_input_field
 
     callback_proxy.callback = wrapper(options.callback)
     btn.callback = nil

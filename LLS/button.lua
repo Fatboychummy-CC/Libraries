@@ -55,6 +55,7 @@
 ---@field result any The resultant value after running the input box. This will be set right before the callback is ran, and will be available in the callback.
 ---@field default_text string? The default text to use when writing to this input field.
 ---@field password_field boolean? If this input is a password field. Censors the input and requires input twice.
+---@field password_input_field boolean? If this input is a password input field. Censors input, but only requires the user to type it once.
 
 ---@class button-char_data
 ---@field char string The character to use.
