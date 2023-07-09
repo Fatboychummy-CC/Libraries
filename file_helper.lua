@@ -52,9 +52,9 @@ function file.write(filename, data)
   h:write(data):close()
 end
 
---- Return a string containing the entirety of the file read.
+--- Return the unserialized contents of the file read.
 ---@param filename string The file to be read.
----@param default any The value returned when th e file does not exist.
+---@param default any The value returned when the file does not exist.
 ---@return any data
 function file.unserialize(filename, default)
   local h = io.open(fs.combine(file.working_directory, filename), 'r')
@@ -71,7 +71,7 @@ end
 
 --- Write data to a file
 ---@param filename string The file to write to.
----@param data any The data to write, this will be serialized.
+---@param data string|number|table|boolean|nil The data to write, this will be serialized.
 function file.serialize(filename, data)
   local h, err = io.open(fs.combine(file.working_directory, filename), 'w')
 
