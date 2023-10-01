@@ -52,8 +52,8 @@ local function log(context, level, level_name, ...)
       args = {n = 1, "Nothing."}
     end
 
-    for i, v in ipairs(args) do
-      args[i] = tostring(v)
+    for i = 1, args.n do
+      args[i] = tostring(args[i])
     end
     local combined = table.concat(args, ' ')
 
