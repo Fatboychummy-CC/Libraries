@@ -72,14 +72,15 @@ end
 --- Write data to a file
 ---@param filename string The file to write to.
 ---@param data string|number|table|boolean|nil The data to write, this will be serialized.
-function file.serialize(filename, data)
+---@param minify boolean? Whether or not to minify the serialized data.
+function file.serialize(filename, data, minify)
   local h, err = io.open(fs.combine(file.working_directory, filename), 'w')
 
   if not h then
     error(("Failed to open '%s' for writing: %s"):format(fs.combine(file.working_directory, filename), err), 2)
   end
 
-  h:write(textutils.serialize(data)):close()
+  h:write(textutils.serialize(data, {compact = minify and true or false})):close()
 end
 
 --- Shorthand to delete from the working directory.
