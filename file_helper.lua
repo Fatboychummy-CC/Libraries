@@ -82,4 +82,10 @@ function file.serialize(filename, data)
   h:write(textutils.serialize(data)):close()
 end
 
+--- Shorthand to delete from the working directory.
+---@param filename string The file to delete.
+function file.delete(filename)
+  fs.delete(fs.combine(file.working_directory, filename))
+end
+
 return file
