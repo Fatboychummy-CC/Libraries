@@ -61,7 +61,6 @@ local arg_patterns = {
   {
     pattern = "^%-%-(%w+)%=(.+)$",
     func = function(flag_info, parsed, name, value)
-      print(name, value)
       parsed.options[name] = value
     end
   },
@@ -132,18 +131,15 @@ function argparse.new_parser(program_name, program_description)
   end
 
   --- Add an option to the parser.
-  ---@param short string? The short name of the option.
   ---@param long string The long name of the option.
   ---@param description string The description of the option.
   ---@param default any The default value of the option.
-  function parser.add_option(short, long, description, default)
-    expect(1, short, "string", "nil")
-    expect(2, long, "string")
-    expect(3, description, "string")
+  function parser.add_option(long, description, default)
+    expect(1, long, "string")
+    expect(2, description, "string")
 
     parser.options[long] = {
       name = long,
-      short = short,
       description = description,
       default = default
     }
