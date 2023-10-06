@@ -3,6 +3,13 @@ local file = {
   working_directory = fs.getDir(shell.getRunningProgram())
 }
 
+--- Check if a file exists in the working directory. Shorthand for fs.exists(fs.combine(file.working_directory, filename)).
+---@param filename string The file to check.
+---@return boolean exists
+function file.exists(filename)
+  return fs.exists(fs.combine(file.working_directory, filename))
+end
+
 --- Return a table of lines from a file.
 ---@param filename string The file to be read.
 ---@param default string[]? The value returned when the file does not exist.
