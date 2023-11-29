@@ -41,7 +41,6 @@
 ---@field holding boolean Used to determine if the player has clicked on the button but hasn't released yet.
 ---@field enabled boolean Whether or not the button is enabled (accepting events).
 ---@field drawn boolean Whether or not the button will be drawn on the next update.
----@field remove fun() Remove this button from the buttons.
 
 ---@class button-button_input_field : button-button_object Note: the information box only appears when the button has been clicked on.
 ---@field verification_callback fun(str:string):boolean,string? Verification function to verify the resultant answer.
