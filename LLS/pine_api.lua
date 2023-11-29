@@ -7,6 +7,10 @@
 ---@field log pine_store-log_root
 ---@field auth pine_store-auth_root
 
+-- ########################################################################## --
+--                                   Project                                  --
+-- ########################################################################## --
+
 ---@class pine_store-project_root
 local project_root = {}
 
@@ -34,6 +38,10 @@ function project_root.changelog(id) end
 ---@return pine_store-response_changelogs|string response The response from PineStore, or the error message.
 function project_root.changelogs(id) end
 
+-- ########################################################################## --
+--                                  Projects                                  --
+-- ########################################################################## --
+
 ---@class pine_store-projects_root
 local projects_root = {}
 
@@ -54,6 +62,10 @@ function projects_root.search(query) end
 ---@return pine_store-response_project|string response The response from PineStore, or the error message.
 function projects_root.named(name) end
 
+-- ########################################################################## --
+--                                    User                                    --
+-- ########################################################################## --
+
 ---@class pine_store-user_root
 local user_root = {}
 
@@ -68,6 +80,10 @@ function user_root.info(id) end
 ---@return boolean success Whether or not the request was successful.
 ---@return pine_store-response_projects|string response The response from PineStore, or the error message.
 function user_root.projects(id) end
+
+-- ########################################################################## --
+--                                    Log                                     --
+-- ########################################################################## --
 
 ---@class pine_store-log_root
 local log_root = {}
