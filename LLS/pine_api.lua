@@ -8,8 +8,12 @@
 ---@field auth pine_store-auth_root
 
 -- ########################################################################## --
---                                   Project                                  --
+--                               Non-authorized                               --
 -- ########################################################################## --
+
+-- ################################################################ --
+--                              Project                             --
+-- ################################################################ --
 
 ---@class pine_store-project_root
 local project_root = {}
@@ -38,9 +42,9 @@ function project_root.changelog(id) end
 ---@return pine_store-response_changelogs|string response The response from PineStore, or the error message.
 function project_root.changelogs(id) end
 
--- ########################################################################## --
---                                  Projects                                  --
--- ########################################################################## --
+-- ################################################################ --
+--                             Projects                             --
+-- ################################################################ --
 
 ---@class pine_store-projects_root
 local projects_root = {}
@@ -62,9 +66,9 @@ function projects_root.search(query) end
 ---@return pine_store-response_project|string response The response from PineStore, or the error message.
 function projects_root.named(name) end
 
--- ########################################################################## --
---                                    User                                    --
--- ########################################################################## --
+-- ################################################################ --
+--                               User                               --
+-- ################################################################ --
 
 ---@class pine_store-user_root
 local user_root = {}
@@ -81,9 +85,9 @@ function user_root.info(id) end
 ---@return pine_store-response_projects|string response The response from PineStore, or the error message.
 function user_root.projects(id) end
 
--- ########################################################################## --
---                                    Log                                     --
--- ########################################################################## --
+-- ################################################################ --
+--                               Log                                --
+-- ################################################################ --
 
 ---@class pine_store-log_root
 local log_root = {}
@@ -101,8 +105,139 @@ function log_root.view(id) end
 ---@return pine_store-response_base|string response The response from PineStore, or the error message.
 function log_root.download(id) end
 
----@class pine_store-auth_root
-local auth_root = {} ---@FIXME I will document this part later...
+-- ########################################################################## --
+--                                 Authorized                                 --
+-- ########################################################################## --
+
+---@class pine_store-auth_root All authorized methods will *throw an error* if the token is not set.
+local auth_root = {}
+
+--- Set the current token.
+---@param token string The token to use.
+function auth_root.set_token(token) end
+
+--- Wipe the current token.
+function auth_root.wipe_token() end
+
+
+-- ################################################################ --
+--                              Profile                             --
+-- ################################################################ --
+
+---@class pine_store-auth_profile
+auth_root.profile = {}
+
+--- Get user info corresponding with the token.
+---@return boolean success Whether or not the request was successful.
+---@return pine_store-response_user|string response The response from PineStore, or the error message.
+function auth_root.profile.info() end
+
+--- Get a list of projects owned by the user corresponding with the token.
+---@return boolean success Whether or not the request was successful.
+---@return pine_store-response_projects|string response The response from PineStore, or the error message.
+function auth_root.profile.projects() end
+
+--- Update account info corresponding with the token. `nil` values by default will be ignored, unless `allow_null` is `true`.
+---@param name string? The new name to use.
+---@param about string? The new about to use.
+---@param about_markdown string? The new about_markdown to use.
+---@param connections pine_store-connection[]? The new connections to use.
+---@param allow_null boolean? If true, null values will be wiped from pinestore, instead of just being ignored.
+---@return boolean success Whether or not the request was successful.
+---@return pine_store-response_base|string response The response from PineStore, or the error message.
+function auth_root.profile.update(name, about, about_markdown, connections, allow_null) end
+
+--- Get the user options corresponding with the token.
+---@return boolean success Whether or not the request was successful.
+---@return pine_store-response_user_options|string response The response from PineStore, or the error message.
+function auth_root.profile.get_options() end
+
+--- Set the user options corresponding with the token. It is recommended that you first get_options, modify the returned table, and then set_options with the modified table.
+---@param options pine_store-user_options The options to set.
+---@return boolean success Whether or not the request was successful.
+---@return pine_store-response_base|string response The response from PineStore, or the error message.
+function auth_root.profile.set_options(options) end
+
+-- ################################################################ --
+--                              Project                             --
+-- ################################################################ --
+
+---@class pine_store-auth_project
+auth_root.project = {}
+
+--- Update information about a project corresponding with the token. `nil` values by default will be ignored, unless `allow_null` is `true`.
+---@param project_data pine_store-project_update The data to update the project with.
+---@return boolean success Whether or not the request was successful.
+---@return pine_store-response_base|string response The response from PineStore, or the error message.
+function auth_root.project.update(project_data) end
+
+--- Post a new project to PineStore.
+---@param name string The name of the project.
+---@return boolean success Whether or not the request was successful.
+---@return pine_store-response_new_project|string response The response from PineStore, or the error message.
+function auth_root.project.new(name) end
+
+--- Delete a project from PineStore.
+---@param id integer The ID of the project to delete.
+---@return boolean success Whether or not the request was successful.
+---@return pine_store-response_base|string response The response from PineStore, or the error message.
+function auth_root.project.delete(id) end
+
+--- Publish an update for a project on PineStore.
+---@param id integer The ID of the project to publish an update for.
+---@param body string? The changelog for the update.
+---@return boolean success Whether or not the request was successful.
+---@return pine_store-response_base|string response The response from PineStore, or the error message.
+function auth_root.project.publish_update(id, body) end
+
+-- ################################################################ --
+--                               Media                              --
+-- ################################################################ --
+
+---@class pine_store-auth_media
+auth_root.media = {}
+
+--- Add an image to a project's media list.
+---@param id integer The ID of the project to add the image to.
+---@param image string The image data to add (can be raw or base64 encoded).
+---@return boolean success Whether or not the request was successful.
+---@return pine_store-response_base|string response The response from PineStore, or the error message.
+function auth_root.media.add(id, image) end
+
+--- Remove an image from a project's media list.
+---@param id integer The ID of the project to remove the image from.
+---@param index integer The index of the image to remove.
+---@return boolean success Whether or not the request was successful.
+---@return pine_store-response_base|string response The response from PineStore, or the error message.
+function auth_root.media.remove(id, index) end
+
+--- Set the thumbnail for a project.
+---@param id integer The ID of the project to set the thumbnail for.
+---@param image string The image data to set as the thumbnail (can be raw or base64 encoded).
+---@return boolean success Whether or not the request was successful.
+---@return pine_store-response_base|string response The response from PineStore, or the error message.
+function auth_root.media.set_thumbnail(id, image) end
+
+-- ################################################################ --
+--                              Comment                             --
+-- ################################################################ --
+
+---@class pine_store-auth_comment
+auth_root.comment = {}
+
+--- Post a comment on a project.
+---@param id integer The ID of the project to post the comment on.
+---@param body string The body of the comment.
+---@param reply_id integer? The ID of the comment to reply to, if this is a reply.
+---@return boolean success Whether or not the request was successful.
+---@return pine_store-response_base|string response The response from PineStore, or the error message.
+function auth_root.comment.post(id, body, reply_id) end
+
+--- Delete a comment on a project.
+---@param id integer The ID of the comment to delete.
+---@return boolean success Whether or not the request was successful.
+---@return pine_store-response_base|string response The response from PineStore, or the error message.
+function auth_root.comment.delete(id) end
 
 -- ########################################################################## --
 --                             Response objects                               --
@@ -129,6 +264,12 @@ local auth_root = {} ---@FIXME I will document this part later...
 
 ---@class pine_store-response_user : pine_store-response_base
 ---@field user pine_store-user? The user data, if success is true.
+
+---@class pine_store-response_user_options : pine_store-response_base
+---@field options pine_store-user_options? The user options, if success is true.
+
+---@class pine_store-response_new_project : pine_store-response_base
+---@field projectId integer? The ID of the new project, if success is true.
 
 ---@class pine_store-project
 ---@field id integer The ID of the project.
@@ -183,6 +324,16 @@ local auth_root = {} ---@FIXME I will document this part later...
 ---@field display string The display name of the connection.
 ---@field link string The link to the connection.
 
+---@class pine_store-user_options
+---@field user_discord string The Discord ID of the user.
+---@field discord_notifications bool_integer Whether or not to send notifications to Discord.
+---@field discord_noti_comment bool_integer Whether or not to send notifications to Discord for comments.
+---@field discord_noti_reply bool_integer Whether or not to send notifications to Discord for replies.
+---@field discord_noti_newfollow_user bool_integer Whether or not to send notifications to Discord for new followers.
+---@field discord_noti_newfollow_project bool_integer Whether or not to send notifications to Discord for new followers of projects.
+---@field discord_noti_following_newproject bool_integer Whether or not to send notifications to Discord for new projects from followed users.
+---@field discord_noti_following_projectupdate bool_integer Whether or not to send notifications to Discord for updates from followed projects.
+
 ---@alias pine_store-connection_type
 ---| '"discord"' # Discord
 ---| '"github"' # GitHub
@@ -191,14 +342,28 @@ local auth_root = {} ---@FIXME I will document this part later...
 ---| '"twitch"' # Twitch
 ---| '"reddit"' # Reddit
 ---| '"steam"' # Steam
----| string # Other
+---| '"link"' # Some other url
+---| string # Pinestore may add other types, this is to prevent warnings when those are used.
 
 ---@alias bool_integer
 ---| '1'
 ---| '0'
 
 -- ########################################################################## --
---                                   Auth                                     --
+--                             Request objects                                --
 -- ########################################################################## --
 
----@FIXME Implement this.
+---@class pine_store-project_update
+---@field allow_null boolean? If true, null values will be wiped from pinestore, instead of just being ignored.
+---@field id integer? The ID of the project.
+---@field name string? The name of the project.
+---@field install_command string? The command to run to install the project.
+---@field download_url string? The URL to download the project from.
+---@field target_file string? The file to run after installation is complete.
+---@field tags string? A list of tags for the project, comma-separated.
+---@field repository string? The URL to the repository for the project.
+---@field description_short string? A short description of the project.
+---@field description string? A long description of the project.
+---@field description_markdown string? A long description of the project, in Markdown format.
+---@field keywords string? A list of keywords for the project, comma-separated.
+---@field visible boolean? Whether or not the project is visible.
