@@ -280,10 +280,10 @@ function auth_root.comment.delete(id) end
 ---@field owner_discord string The Discord ID of the owner of the project.
 ---@field owner_name string The name of the owner of the project.
 ---@field name string The name of the project.
----@field install_command string The command to run to install the project.
----@field download_url string? The URL to download the project from.
+---@field install_command string? The command to run to install the project. If this is nil, download_url must exist.
+---@field download_url string? The URL to download the project from. If this is nil, install_command must exist.
 ---@field target_file string? The file to run after installation is complete.
----@field tags string A list of tags for the project, comma-separated.
+---@field tags string A list of tags for the project, comma-separated. This may change to be an array in the future.
 ---@field repository string? The URL to the repository for the project.
 ---@field description_short string? A short description of the project.
 ---@field description string? A long description of the project.
@@ -295,6 +295,7 @@ function auth_root.comment.delete(id) end
 ---@field downloads integer The number of downloads for the project.
 ---@field downloads_recent integer The number of downloads for the project in the last 30 days.
 ---@field views integer The number of views for the project.
+---@field views_recent integer The number of views for the project in the last 30 days.
 ---@field visible bool_integer Whether or not the project is visible.
 
 ---@class pine_store-comment
@@ -322,7 +323,7 @@ function auth_root.comment.delete(id) end
 ---@class pine_store-connection
 ---@field id pine_store-connection_type The type of connection.
 ---@field display string The display name of the connection.
----@field link string The link to the connection.
+---@field link string? The link to the connection. Can be nil if the connection is not a link (i.e: A discord username).
 
 ---@class pine_store-user_options
 ---@field user_discord string The Discord ID of the user.
