@@ -143,7 +143,7 @@ end
 -- ################################################################ --
 
 function pine_api.user.info(id)
-  expect(1, id, "number")
+  expect(1, id, "string")
 
   return pine_get("user/" .. id)
 end

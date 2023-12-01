@@ -74,7 +74,7 @@ function projects_root.named(name) end
 local user_root = {}
 
 --- Get information about a user from PineStore.
----@param id integer The ID of the user to get.
+---@param id string The Discord ID of the user to get.
 ---@return boolean success Whether or not the request was successful.
 ---@return pine_store-response_user|string response The response from PineStore, or the error message.
 function user_root.info(id) end
