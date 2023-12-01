@@ -198,7 +198,7 @@ auth_root.media = {}
 ---@param image string The image data to add (can be raw or base64 encoded).
 ---@return boolean success Whether or not the request was successful.
 ---@return pine_store-response_base|string response The response from PineStore, or the error message.
-function auth_root.media.add(id, image) end
+function auth_root.media.new(id, image) end
 
 --- Remove an image from a project's media list.
 ---@param id integer The ID of the project to remove the image from.
@@ -227,7 +227,7 @@ auth_root.comment = {}
 ---@param reply_id integer? The ID of the comment to reply to, if this is a reply.
 ---@return boolean success Whether or not the request was successful.
 ---@return pine_store-response_base|string response The response from PineStore, or the error message.
-function auth_root.comment.post(id, body, reply_id) end
+function auth_root.comment.new(id, body, reply_id) end
 
 --- Delete a comment on a project.
 ---@param id integer The ID of the comment to delete.
@@ -358,9 +358,9 @@ function auth_root.comment.delete(id) end
 ---@field connections pine_store-connection[]? A list of connections for the user.
 
 ---@class pine_store-project_update
----@field id integer The ID of the project.
+---@field projectId integer The ID of the prprojectoject.
 ---@field allow_null boolean? If true, null values will be wiped from pinestore, instead of just being ignored.
----@field name string? The name of the project.
+---@field projectname string? The name of the project.
 ---@field install_command string? The command to run to install the project.
 ---@field download_url string? The URL to download the project from.
 ---@field target_file string? The file to run after installation is complete.
@@ -371,3 +371,4 @@ function auth_root.comment.delete(id) end
 ---@field description_markdown string? A long description of the project, in Markdown format.
 ---@field keywords string? A list of keywords for the project, comma-separated.
 ---@field visible boolean? Whether or not the project is visible.
+---@field date_release integer? The UNIX timestamp corresponding to when the project will be released, for a countdown timer.
