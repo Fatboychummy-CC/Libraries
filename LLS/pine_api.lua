@@ -358,8 +358,8 @@ function auth_root.comment.delete(id) end
 ---@field connections pine_store-connection[]? A list of connections for the user.
 
 ---@class pine_store-project_update
+---@field id integer The ID of the project.
 ---@field allow_null boolean? If true, null values will be wiped from pinestore, instead of just being ignored.
----@field id integer? The ID of the project.
 ---@field name string? The name of the project.
 ---@field install_command string? The command to run to install the project.
 ---@field download_url string? The URL to download the project from.
