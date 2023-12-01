@@ -16,7 +16,7 @@ local function parse_response(handle, err, err_handle)
     return false, "Failed to connect to PineStore: " .. err
   end
 
-  local success, response = pcall(textutils.unserializeJSON, handle or err_handle);
+  local success, response = pcall(textutils.unserializeJSON, handle and handle.readAll() or err_handle and err_handle.readAll());
 
   (handle or err_handle).close()
 
