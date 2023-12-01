@@ -138,14 +138,10 @@ function auth_root.profile.info() end
 function auth_root.profile.projects() end
 
 --- Update account info corresponding with the token. `nil` values by default will be ignored, unless `allow_null` is `true`.
----@param name string? The new name to use.
----@param about string? The new about to use.
----@param about_markdown string? The new about_markdown to use.
----@param connections pine_store-connection[]? The new connections to use.
----@param allow_null boolean? If true, null values will be wiped from pinestore, instead of just being ignored.
+---@param new_data pine_store-user_update The table containing the data you wish to alter.
 ---@return boolean success Whether or not the request was successful.
 ---@return pine_store-response_base|string response The response from PineStore, or the error message.
-function auth_root.profile.update(name, about, about_markdown, connections, allow_null) end
+function auth_root.profile.update(new_data) end
 
 --- Get the user options corresponding with the token.
 ---@return boolean success Whether or not the request was successful.
@@ -353,6 +349,13 @@ function auth_root.comment.delete(id) end
 -- ########################################################################## --
 --                             Request objects                                --
 -- ########################################################################## --
+
+---@class pine_store-user_update
+---@field allow_null boolean? If true, null values will be wiped from pinestore, instead of just being ignored.
+---@field name string? The new name to use.
+---@field about string? A short description of the user.
+---@field about_markdown string? A short description of the user, in Markdown format.
+---@field connections pine_store-connection[]? A list of connections for the user.
 
 ---@class pine_store-project_update
 ---@field allow_null boolean? If true, null values will be wiped from pinestore, instead of just being ignored.
