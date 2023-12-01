@@ -67,7 +67,7 @@ end
 
 --- PineStore API.
 ---@type pine_store-base
-local api = {
+local pine_api = {
   project = {},
   projects = {},
   user = {},
@@ -91,25 +91,25 @@ local auth_token = nil ---@type string?
 --                              Project                             --
 -- ################################################################ --
 
-function api.project.info(id)
+function pine_api.project.info(id)
   expect(1, id, "number")
 
   return pine_get("project/" .. id)
 end
 
-function api.project.comments(id)
+function pine_api.project.comments(id)
   expect(1, id, "number")
 
   return pine_get("project/" .. id .. "/comments")
 end
 
-function api.project.changelog(id)
+function pine_api.project.changelog(id)
   expect(1, id, "number")
 
   return pine_get("project/" .. id .. "/changelog")
 end
 
-function api.project.changelogs(id)
+function pine_api.project.changelogs(id)
   expect(1, id, "number")
 
   return pine_get("project/" .. id .. "/changelogs")
@@ -119,17 +119,17 @@ end
 --                            Projects                              --
 -- ################################################################ --
 
-function api.projects.list()
+function pine_api.projects.list()
   return pine_get("projects")
 end
 
-function api.projects.search(query)
+function pine_api.projects.search(query)
   expect(1, query, "string")
 
   return pine_get("projects/search/?q=" .. textutils.urlEncode(query))
 end
 
-function api.projects.named(name)
+function pine_api.projects.named(name)
   expect(1, name, "string")
 
   return pine_get("projects/named/?name=" .. textutils.urlEncode(name))
@@ -139,13 +139,13 @@ end
 --                              User                                --
 -- ################################################################ --
 
-function api.user.info(id)
+function pine_api.user.info(id)
   expect(1, id, "number")
 
   return pine_get("user/" .. id)
 end
 
-function api.user.projects(id)
+function pine_api.user.projects(id)
   expect(1, id, "number")
 
   return pine_get("user/" .. id .. "/projects")
@@ -155,7 +155,7 @@ end
 --                               Log                                --
 -- ################################################################ --
 
-function api.log.view(id)
+function pine_api.log.view(id)
   expect(1, id, "number")
 
   return pine_post("log/view", textutils.serializeJSON {
@@ -163,7 +163,7 @@ function api.log.view(id)
   })
 end
 
-function api.log.download(id)
+function pine_api.log.download(id)
   expect(1, id, "number")
 
   return pine_post("log/download", textutils.serializeJSON {
@@ -180,8 +180,8 @@ end
 --                             profile                              --
 -- ################################################################ --
 
-function api.auth.profile.info()
+function pine_api.auth.profile.info()
   return pine_get("auth/profile", auth_token)
 end
 
-return api
+return pine_api
