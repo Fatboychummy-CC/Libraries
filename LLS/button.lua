@@ -1,4 +1,4 @@
----@meta
+---@meta button
 
 ---@class button-button_options
 ---@field x integer The X position of the button.

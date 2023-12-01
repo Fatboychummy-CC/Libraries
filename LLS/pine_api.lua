@@ -1,4 +1,4 @@
----@meta
+---@meta pine_api
 
 ---@class pine_store-base
 ---@field project pine_store-project_root

@@ -83,7 +83,8 @@ local pine_api = {
 }
 local auth_token = nil ---@type string?
 
----@diagnostic disable:duplicate-set-field Does @meta do nothing?
+---@diagnostic disable:duplicate-set-field
+-- Does @meta do nothing?
 
 -- ########################################################################## --
 --                               Non-authorized                               --

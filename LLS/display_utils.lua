@@ -1,4 +1,4 @@
----@meta
+---@meta display_utils
 
 ---@class display_utils-hfpb_options High Fidelity Percentage Bar Options
 ---@field x integer The X position of the left of the percentage bar.
