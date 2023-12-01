@@ -376,4 +376,4 @@ function pine_api.auth.comment.delete(id)
   }, auth_token)
 end
 
-return pine_api
+return pine_api --[[@as pine_store-base]]
