@@ -31,19 +31,38 @@ end
 
 --- Make a get request to PineStore.
 ---@param url string The endpoint to get.
+---@param authorization string? The authorization token to use.
 ---@return boolean success Whether or not the response was successful.
 ---@return any response The response from PineStore, or the error message.
-local function pine_get(url)
-  return parse_response(http.get(PINESTORE_ROOT .. url))
+local function pine_get(url, authorization)
+  return parse_response(http.get(
+    PINESTORE_ROOT .. url,
+    {
+      ---@diagnostic disable-next-line If it's nil it shrimply doesn't get appended.
+      authorization = authorization
+    }
+  ))
+  ---@FIXME actually implement the authorization part.
 end
 
 --- Make a post request PineStore
 ---@param url string The endpoint to get.
 ---@param data string The data to send.
+---@param authorization string? The authorization token to use.
 ---@return boolean success Whether or not the response was successful.
 ---@return any response The response from PineStore, or the error message.
-local function pine_post(url, data)
-  return parse_response(http.post(PINESTORE_ROOT .. url, data))
+local function pine_post(url, data, authorization)
+  return parse_response(http.post(
+    PINESTORE_ROOT .. url,
+    data,
+    {
+      ["Content-Type"] = "application/json",
+      ---@diagnostic disable-next-line If it's nil it shrimply doesn't get appended.
+      authorization = authorization
+    }
+  ))
+
+  ---@FIXME Actually implement the authorization part.
 end
 
 --- PineStore API.
@@ -53,14 +72,24 @@ local api = {
   projects = {},
   user = {},
   log = {},
-  auth = {}
+  auth = {
+    profile = {},
+    project = {},
+    media = {},
+    comment = {}
+  }
 }
+local auth_token = nil ---@type string?
 
 ---@diagnostic disable:duplicate-set-field Does @meta do nothing?
 
 -- ########################################################################## --
---                                   Project                                  --
+--                               Non-authorized                               --
 -- ########################################################################## --
+
+-- ################################################################ --
+--                              Project                             --
+-- ################################################################ --
 
 function api.project.info(id)
   expect(1, id, "number")
@@ -86,9 +115,9 @@ function api.project.changelogs(id)
   return pine_get("project/" .. id .. "/changelogs")
 end
 
--- ########################################################################## --
---                                 Projects                                   --
--- ########################################################################## --
+-- ################################################################ --
+--                            Projects                              --
+-- ################################################################ --
 
 function api.projects.list()
   return pine_get("projects")
@@ -106,9 +135,9 @@ function api.projects.named(name)
   return pine_get("projects/named/?name=" .. textutils.urlEncode(name))
 end
 
--- ########################################################################## --
---                                   User                                     --
--- ########################################################################## --
+-- ################################################################ --
+--                              User                                --
+-- ################################################################ --
 
 function api.user.info(id)
   expect(1, id, "number")
@@ -122,9 +151,9 @@ function api.user.projects(id)
   return pine_get("user/" .. id .. "/projects")
 end
 
--- ########################################################################## --
---                                   Log                                      --
--- ########################################################################## --
+-- ################################################################ --
+--                               Log                                --
+-- ################################################################ --
 
 function api.log.view(id)
   expect(1, id, "number")
@@ -143,10 +172,16 @@ function api.log.download(id)
 end
 
 -- ########################################################################## --
---                                   Auth                                     --
+--                                 Authorized                                 --
 -- ########################################################################## --
 
----@FIXME Implement this.
 
+-- ################################################################ --
+--                             profile                              --
+-- ################################################################ --
+
+function api.auth.profile.info()
+  return pine_get("auth/profile", auth_token)
+end
 
 return api
