@@ -148,8 +148,8 @@ function auth_root.profile.update(new_data) end
 ---@return pine_store-response_user_options|string response The response from PineStore, or the error message.
 function auth_root.profile.get_options() end
 
---- Set the user options corresponding with the token. It is recommended that you first get_options, modify the returned table, and then set_options with the modified table.
----@param options pine_store-user_options The options to set.
+--- Set the user options corresponding with the token.
+---@param options pine_store-user_options_update The options to set.
 ---@return boolean success Whether or not the request was successful.
 ---@return pine_store-response_base|string response The response from PineStore, or the error message.
 function auth_root.profile.set_options(options) end
@@ -356,6 +356,15 @@ function auth_root.comment.delete(id) end
 ---@field about string? A short description of the user.
 ---@field about_markdown string? A short description of the user, in Markdown format.
 ---@field connections pine_store-connection[]? A list of connections for the user.
+
+---@class pine_store-user_options_update
+---@field discord_notifications boolean? Whether or not to send notifications to Discord.
+---@field discord_noti_comment boolean? Whether or not to send notifications to Discord for comments.
+---@field discord_noti_reply boolean? Whether or not to send notifications to Discord for replies.
+---@field discord_noti_newfollow_user boolean? Whether or not to send notifications to Discord for new followers.
+---@field discord_noti_newfollow_project boolean? Whether or not to send notifications to Discord for new followers of projects.
+---@field discord_noti_following_newproject boolean? Whether or not to send notifications to Discord for new projects from followed users.
+---@field discord_noti_following_projectupdate boolean? Whether or not to send notifications to Discord for updates from followed projects.
 
 ---@class pine_store-project_update
 ---@field projectId integer The ID of the prprojectoject.

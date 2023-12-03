@@ -21,6 +21,9 @@ local function parse_response(handle, err, err_handle)
   (handle or err_handle).close()
 
   if not success or not response then
+    if err then
+      return false, "Failed to parse response from pinestore: " .. err
+    end
     return false, "Failed to parse response from pinestore."
   end
 
@@ -239,14 +242,14 @@ function pine_api.auth.profile.set_options(options)
 
   -- Validation: Collect the error from `field`, then supply more information about the error.
   local ok, err = pcall(function()
-    field(options, "user_discord", "string")
-    field(options, "discord_notifications", "boolean")
-    field(options, "diiscord_noti_comment", "boolean")
-    field(options, "discord_noti_reply", "boolean")
-    field(options, "discord_noti_newfollow_user", "boolean")
-    field(options, "discord_noti_newfollow_project", "boolean")
-    field(options, "discord_noti_following_newproject", "boolean")
-    field(options, "discord_noti_following_projectupdate", "boolean")
+    field(options, "user_discord", "string", "nil")
+    field(options, "discord_notifications", "boolean", "nil")
+    field(options, "diiscord_noti_comment", "boolean", "nil")
+    field(options, "discord_noti_reply", "boolean", "nil")
+    field(options, "discord_noti_newfollow_user", "boolean", "nil")
+    field(options, "discord_noti_newfollow_project", "boolean", "nil")
+    field(options, "discord_noti_following_newproject", "boolean", "nil")
+    field(options, "discord_noti_following_projectupdate", "boolean", "nil")
   end)
 
   if not ok then
