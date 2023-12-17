@@ -2,6 +2,7 @@
 
 local expect = require "cc.expect".expect
 
+---@class logging
 local logging = {
   ---@enum logging-log_level
   LOG_LEVEL = {
