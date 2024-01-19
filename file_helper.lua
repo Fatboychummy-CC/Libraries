@@ -59,6 +59,19 @@ function file.write(filename, data)
   h:write(data):close()
 end
 
+--- Append data to a file
+---@param filename string The file to write to.
+---@param data string The data to write.
+function file.append(filename, data)
+  local h, err = io.open(fs.combine(file.working_directory, filename), 'a')
+
+  if not h then
+    error(("Failed to open '%s' for writing: %s"):format(fs.combine(file.working_directory, filename), err), 2)
+  end
+
+  h:write(data):close()
+end
+
 --- Return the unserialized contents of the file read.
 ---@param filename string The file to be read.
 ---@param default any The value returned when the file does not exist.
@@ -87,7 +100,7 @@ function file.serialize(filename, data, minify)
     error(("Failed to open '%s' for writing: %s"):format(fs.combine(file.working_directory, filename), err), 2)
   end
 
-  h:write(textutils.serialize(data, {compact = minify and true or false})):close()
+  h:write(textutils.serialize(data, {compact = minify and true or false, allow_repetitions=true})):close()
 end
 
 --- Shorthand to delete from the working directory.
