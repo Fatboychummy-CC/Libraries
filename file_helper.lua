@@ -72,6 +72,19 @@ function file.append(filename, data)
   h:write(data):close()
 end
 
+--- Create an empty file (or empty the contents of an existing file).
+---@param filename string The file to write to.
+function file.empty(filename)
+  fs.delete(fs.combine(file.working_directory, filename))
+  local h, err = io.open(fs.combine(file.working_directory, filename), 'w')
+
+  if not h then
+    error(("Failed to open '%s' for writing: %s"):format(fs.combine(file.working_directory, filename), err), 2)
+  end
+
+  h:close()
+end
+
 --- Return the unserialized contents of the file read.
 ---@param filename string The file to be read.
 ---@param default any The value returned when the file does not exist.
