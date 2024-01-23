@@ -113,6 +113,7 @@ function file.serialize(filename, data, minify)
     error(("Failed to open '%s' for writing: %s"):format(fs.combine(file.working_directory, filename), err), 2)
   end
 
+  ---@diagnostic disable-next-line ITS FINE
   h:write(textutils.serialize(data, {compact = minify and true or false, allow_repetitions=true})):close()
 end
 
@@ -120,6 +121,17 @@ end
 ---@param filename string The file to delete.
 function file.delete(filename)
   fs.delete(fs.combine(file.working_directory, filename))
+end
+
+--- Create an instance of the file helper with a different working directory.
+---@param working_directory string? The working directory to use.
+---@return file_helper file
+function file.instanced(working_directory)
+  local new_helper = {
+    working_directory = working_directory
+  }
+
+  return setmetatable(new_helper, {__index = file})
 end
 
 return file
