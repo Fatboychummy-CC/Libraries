@@ -128,7 +128,7 @@ end
 ---@return file_helper file
 function file.instanced(working_directory)
   local new_helper = {
-    working_directory = working_directory
+    working_directory = fs.combine(file.working_directory, working_directory)
   }
 
   return setmetatable(new_helper, {__index = file})
