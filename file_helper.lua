@@ -186,7 +186,7 @@ function file:serialize(filename, data, minify)
   end
 
   ---@diagnostic disable-next-line ITS FINE
-  h:write(textutils.serialize(data, {compact = minify and true or false, allow_repetitions=true})):close()
+  h:write(textutils.serialize(data, {compact = minify and true or false})):close()
 end
 
 --- Shorthand to delete from the working directory.
