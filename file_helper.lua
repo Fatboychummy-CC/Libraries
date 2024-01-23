@@ -36,7 +36,7 @@ function file:get_lines(filename, default)
   local lines = {}
 
   if not fs.exists(fs.combine(self.working_directory, filename)) then
-    return default or {}
+    return default or {n = 0}
   end
 
   for line in io.lines(fs.combine(self.working_directory, filename)) do
