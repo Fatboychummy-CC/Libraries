@@ -227,7 +227,8 @@ function file:list(directory)
     self = file --[[@as file_helper]]
   end
 
-  expect(1, directory, "string")
+  expect(1, directory, "string", "nil")
+  directory = directory or ""
 
   return fs.list(fs.combine(self.working_directory, directory))
 end
