@@ -219,7 +219,7 @@ function file:instanced(working_directory)
 end
 
 --- List the contents of a directory. This is a shorthand for fs.list(fs.combine(self.working_directory, directory)).
----@param directory string The directory to list.
+---@param directory string? The directory to list.
 ---@return string[] files
 function file:list(directory)
   if type(self) ~= "table" then -- shift arguments, not instanced.
