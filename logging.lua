@@ -173,7 +173,8 @@ end
 
 --- Dump the log to a file.
 ---@param filename string The file to dump to.
-function logging.dump_log(filename)
+---@param dont_clear boolean? If true, does not clear the log after dumping.
+function logging.dump_log(filename, dont_clear)
   local h, err = fs.open(filename, 'w') --[[@as WriteHandle]]
 
   if not h then error(err, 0) end
@@ -183,7 +184,9 @@ function logging.dump_log(filename)
   end
   h.close()
 
-  log_lines = {n = 0}
+  if not dont_clear then
+    log_lines = {n = 0}
+  end
 end
 
 return logging
