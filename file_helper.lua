@@ -218,4 +218,18 @@ function file:instanced(working_directory)
   return setmetatable(new_helper, {__index = file})
 end
 
+--- List the contents of a directory. This is a shorthand for fs.list(fs.combine(self.working_directory, directory)).
+---@param directory string The directory to list.
+---@return string[] files
+function file:list(directory)
+  if type(self) ~= "table" then -- shift arguments, not instanced.
+    directory = self --[[@as string]]
+    self = file --[[@as file_helper]]
+  end
+
+  expect(1, directory, "string")
+
+  return fs.list(fs.combine(self.working_directory, directory))
+end
+
 return file
