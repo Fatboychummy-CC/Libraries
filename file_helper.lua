@@ -233,4 +233,19 @@ function file:list(directory)
   return fs.list(fs.combine(self.working_directory, directory))
 end
 
+--- Check if the path given is a directory. This is a shorthand for fs.isDir(fs.combine(self.working_directory, path)).
+---@param path string? The path to check.
+---@return boolean is_directory
+function file:is_directory(path)
+  if type(self) ~= "table" then -- shift arguments, not instanced.
+    path = self --[[@as string]]
+    self = file --[[@as file_helper]]
+  end
+
+  expect(1, path, "string", "nil")
+  path = path or ""
+
+  return fs.isDir(fs.combine(self.working_directory, path))
+end
+
 return file
