@@ -154,6 +154,7 @@ end
 ---@see thready.parallelAll
 function thready.main_loop()
   thready.running = true
+  thread_context.debug("Thready started.")
   while thready.running do
     local event_data = table.pack(os.pullEvent())
 
@@ -166,6 +167,7 @@ function thready.main_loop()
 
     run(table.unpack(event_data, 1, event_data.n))
   end
+  thread_context.debug("Thready stopped.")
 end
 
 --- Start the thread system in parallel with other functions. This is a shorthand to `parallel.waitForAny(thready.main_loop, ...)`.
@@ -242,6 +244,7 @@ function thready.spawn(set_name, thread_fun)
     thready.coroutines[set_name] = {}
   end
 
+  thread_context.debug(("Spawning thread id %d in set %s."):format(id, set_name))
   table.insert(thready.coroutines[set_name], coro_data)
   return id
 end
@@ -265,6 +268,7 @@ function thready.listen(set_name, event, callback)
     id = id
   })
 
+  thread_context.debug(("Listening for event %s in set %s with listener id %d."):format(event, set_name, id))
   return id
 end
 
@@ -278,9 +282,12 @@ function thready.remove_listener(id)
     if thready.listeners[i].id == id then
       table.remove(thready.listeners, i)
       used_ids[id] = nil
+      thread_context.debug(("Removed listener id %d."):format(id))
       return
     end
   end
+
+  thread_context.warn(("Attempted to remove listener id %d, but it does not exist."):format(id))
 end
 
 --- Kill a thread.
@@ -293,10 +300,13 @@ function thready.kill(id)
     for i = 1, #coros do
       if coros[i].id == id then
         remove_thread(set_name, id)
+        thread_context.debug(("Killed thread id %d in set %s."):format(id, set_name))
         return
       end
     end
   end
+
+  thread_context.warn(("Attempted to kill thread id %d, but it does not exist."):format(id))
 end
 
 --- Kill all threads for a given set.
@@ -304,6 +314,7 @@ end
 function thready.kill_all(set_name)
   expect(1, set_name, "string")
   --
+  thread_context.debug(("Killing all threads in set %s."):format(set_name))
 
   local coros = thready.coroutines[set_name]
 
