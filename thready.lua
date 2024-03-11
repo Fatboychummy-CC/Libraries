@@ -150,7 +150,8 @@ local function run(event_name, ...)
 end
 
 --- Run the main loop of the thread system. Recommend using this with `parallel`.
----@see thready.parallel
+---@see thready.parallelAny
+---@see thready.parallelAll
 function thready.main_loop()
   thready.running = true
   while thready.running do
@@ -170,14 +171,14 @@ end
 --- Start the thread system in parallel with other functions. This is a shorthand to `parallel.waitForAny(thready.main_loop, ...)`.
 --- ## Usage
 --- ```lua
---- thready.parallel(
+--- thready.parallelAny(
 ---   your_main_loop,
 ---   other_main_loop,
 ---   ...
 --- )
 --- ```
 ---@param ... function The main loop(s) of the program.
-function thready.parallel(...)
+function thready.parallelAny(...)
   if thready.running then
     error("Thread system is already running.", 2)
   end
@@ -189,6 +190,30 @@ function thready.parallel(...)
   end
 
   parallel.waitForAny(thready.main_loop, ...)
+end
+
+--- Start the thread system in parallel with other functions. This is a shorthand to `parallel.waitForAll(thready.main_loop, ...)`.
+--- ## Usage
+--- ```lua
+--- thready.parallelAll(
+---   your_main_loop,
+---   other_main_loop,
+---   ...
+--- )
+--- ```
+---@param ... function The main loop(s) of the program.
+function thready.parallelAll(...)
+  if thready.running then
+    error("Thread system is already running.", 2)
+  end
+
+  local args = {...}
+
+  for i, fun in ipairs(args) do
+    expect(i, fun, "function")
+  end
+
+  parallel.waitForAll(thready.main_loop, ...)
 end
 
 --- Spawn a new thread for a given set.
