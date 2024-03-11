@@ -11,6 +11,7 @@ local thread_context = logging.create_context("Thready")
 ---@field event_filter string|nil The event filter for the thread.
 ---@field status thread_status The status of the thread.
 ---@field alive boolean Whether the thread is alive or not.
+---@field init_args table The arguments passed to the thread function.
 
 ---@class listener_data
 ---@field event string The event to listen for.
@@ -22,7 +23,7 @@ local thread_context = logging.create_context("Thready")
 
 ---@class thready
 ---@field coroutines table<string, thread_data[]> A table of coroutines for each set.
----@field listeners listener_data[] A table of listeners for each event.
+---@field listeners table<string, listener_data[]> A table of listeners for each set/event.
 ---@field stop_on_error boolean Whether to stop the entire system on error.
 ---@field kill_all_owned_on_error boolean Whether to kill all threads for a set on error.
 ---@field running boolean Whether the system is currently running.
@@ -58,14 +59,18 @@ local function check_errored(coro_data)
     end
 
     if thready.kill_all_owned_on_error then
-      thread_context.error("%s thread %d errored: %s", coro_data.set_name, coro_data.id, coro_data.event_filter)
+      thread_context.error(("%s thread %d errored: %s"):format(coro_data.set_name, coro_data.id, coro_data.event_filter))
       return true
     else
-      thread_context.warn("Ignoring error in %s thread %d: %s", coro_data.set_name, coro_data.id, coro_data.event_filter)
+      thread_context.warn(("Ignoring error in %s thread %d: %s"):format(coro_data.set_name, coro_data.id, coro_data.event_filter))
     end
   end
 
   return false
+end
+
+local function update_status(coro_data)
+  coro_data.status = coroutine.status(coro_data.thread)
 end
 
 local function remove_thread(set_name, id)
@@ -107,19 +112,23 @@ local function run(event_name, ...)
           break -- stop executing this set's coroutines
         end
 
+        update_status(coro)
+
         -- If the coroutine is dead, mark it for removal.
         if coro.status == "dead" then
           to_remove[coro.id] = set_name
         end
       elseif coro.status == "new" then
         -- Initialize by running once.
-        coro.alive, coro.event_filter = coroutine.resume(coro.thread)
+        coro.alive, coro.event_filter = coroutine.resume(coro.thread, table.unpack(coro.init_args, 1, coro.init_args.n))
 
         -- Check if errored
         if check_errored(coro) then
           to_kill[set_name] = true
           break -- stop executing this set's coroutines
         end
+
+        update_status(coro)
 
         -- If the coroutine is dead, mark it for removal.
         if coro.status == "dead" then
@@ -159,9 +168,11 @@ function thready.main_loop()
     local event_data = table.pack(os.pullEvent())
 
     -- spawn listeners
-    for _, listener in ipairs(thready.listeners) do
-      if listener.event == event_data[1] then
-        thready.spawn(listener.set_name, listener.callback)
+    for _, set in pairs(thready.listeners) do
+      for _, listener in ipairs(set) do
+        if listener.event == event_data[1] then
+          thready.spawn(listener.set_name, listener.callback, table.unpack(event_data, 1, event_data.n))
+        end
       end
     end
 
@@ -221,8 +232,9 @@ end
 --- Spawn a new thread for a given set.
 ---@param set_name string The name of the set to spawn the thread in.
 ---@param thread_fun fun() The function to run in the thread.
+---@param ... any The arguments to pass to the thread function.
 ---@return integer id The ID of the spawned thread.
-function thready.spawn(set_name, thread_fun)
+function thready.spawn(set_name, thread_fun, ...)
   expect(1, set_name, "string")
   expect(2, thread_fun, "function")
   --
@@ -237,7 +249,8 @@ function thready.spawn(set_name, thread_fun)
     set_name = set_name,
     event_filter = nil,
     status = "new",
-    alive = true
+    alive = true,
+    init_args = table.pack(...)
   }
 
   if not thready.coroutines[set_name] then
@@ -261,7 +274,11 @@ function thready.listen(set_name, event, callback)
   local id = gen_unique_id()
   used_ids[id] = true
 
-  table.insert(thready.listeners, {
+  if not thready.listeners[set_name] then
+    thready.listeners[set_name] = {}
+  end
+
+  table.insert(thready.listeners[set_name], {
     event = event,
     set_name = set_name,
     callback = callback,
@@ -278,12 +295,14 @@ function thready.remove_listener(id)
   expect(1, id, "number")
   --
 
-  for i = 1, #thready.listeners do
-    if thready.listeners[i].id == id then
-      table.remove(thready.listeners, i)
-      used_ids[id] = nil
-      thread_context.debug(("Removed listener id %d."):format(id))
-      return
+  for _, set in pairs(thready.listeners) do
+    for i = 1, #set do
+      if set[i].id == id then
+        table.remove(set, i)
+        used_ids[id] = nil
+        thread_context.debug(("Removed listener id %d."):format(id))
+        return
+      end
     end
   end
 
@@ -314,7 +333,7 @@ end
 function thready.kill_all(set_name)
   expect(1, set_name, "string")
   --
-  thread_context.debug(("Killing all threads in set %s."):format(set_name))
+  thread_context.debug(("Killing all threads and stopping listeners in set %s."):format(set_name))
 
   local coros = thready.coroutines[set_name]
 
@@ -330,6 +349,9 @@ function thready.kill_all(set_name)
 
   -- Remove the coroutines
   thready.coroutines[set_name] = nil
+
+  -- Remove the listeners
+  thready.listeners[set_name] = nil
 end
 
 --- Clear the entire thread system.
