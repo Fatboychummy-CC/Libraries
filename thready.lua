@@ -11,15 +11,23 @@ local thread_context = logging.create_context("Thready")
 ---@field status thread_status The status of the thread.
 ---@field alive boolean Whether the thread is alive or not.
 
+---@class listener_data
+---@field event string The event to listen for.
+---@field callback fun(event:string, ...:any) The callback to run when the event is received.
+---@field id integer The ID of the listener.
+---@field set_name string The name of the set that owns the listener.
+
 ---@alias thread_status "running"|"suspended"|"dead"|"new"
 
 ---@class thready
 ---@field coroutines table<string, thread_data[]> A table of coroutines for each set.
+---@field listeners listener_data[] A table of listeners for each event.
 ---@field stop_on_error boolean Whether to stop the entire system on error.
 ---@field kill_all_owned_on_error boolean Whether to kill all threads for a set on error.
 ---@field running boolean Whether the system is currently running.
 local thready = {
   coroutines = {},
+  listeners = {},
   stop_on_error = false,
   kill_all_owned_on_error = true,
   running = false
@@ -144,7 +152,16 @@ end
 ---@see thready.parallel
 function thready.main_loop()
   while thready.running do
-    run(os.pullEvent())
+    local event_data = table.pack(os.pullEvent())
+
+    -- spawn listeners
+    for _, listener in ipairs(thready.listeners) do
+      if listener.event == event_data[1] then
+        thready.spawn(listener.set_name, listener.callback)
+      end
+    end
+
+    run(table.unpack(event_data, 1, event_data.n))
   end
 end
 
@@ -200,6 +217,36 @@ function thready.spawn(set_name, thread_fun)
 
   table.insert(thready.coroutines[set_name], coro_data)
   return id
+end
+
+--- Add a listener for a given event.
+---@param event string The event to listen for.
+---@param callback fun(event:string, ...:any) The callback to run when the event is received.
+function thready.listen(set_name, event, callback)
+  expect(1, event, "string")
+  expect(2, callback, "function")
+  --
+
+  table.insert(thready.listeners, {
+    event = event,
+    set_name = set_name,
+    callback = callback,
+    id = gen_unique_id()
+  })
+end
+
+--- Remove a listener by its ID. This will not stop any currently running listeners.
+---@param id integer The ID of the listener to remove.
+function thready.remove_listener(id)
+  expect(1, id, "number")
+  --
+
+  for i = 1, #thready.listeners do
+    if thready.listeners[i].id == id then
+      table.remove(thready.listeners, i)
+      return
+    end
+  end
 end
 
 --- Kill a thread.
