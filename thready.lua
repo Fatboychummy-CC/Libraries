@@ -25,13 +25,13 @@ local thread_context = logging.create_context("Thready")
 ---@field coroutines table<string, thread_data[]> A table of coroutines for each set.
 ---@field listeners table<string, listener_data[]> A table of listeners for each set/event.
 ---@field stop_on_error boolean Whether to stop the entire system on error.
----@field kill_all_owned_on_error boolean Whether to kill all threads for a set on error.
+---@field kill_set_on_error boolean Whether to kill all threads for a set on error.
 ---@field running boolean Whether the system is currently running.
 local thready = {
   coroutines = {},
   listeners = {},
   stop_on_error = false,
-  kill_all_owned_on_error = true,
+  kill_set_on_error = true,
   running = false
 }
 
@@ -58,7 +58,7 @@ local function check_errored(coro_data)
       error(("%s thread %d errored: %s"):format(coro_data.set_name, coro_data.id, coro_data.event_filter), 0)
     end
 
-    if thready.kill_all_owned_on_error then
+    if thready.kill_set_on_error then
       thread_context.error(("%s thread %d errored: %s"):format(coro_data.set_name, coro_data.id, coro_data.event_filter))
       return true
     else
