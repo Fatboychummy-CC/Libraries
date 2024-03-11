@@ -1,5 +1,6 @@
 --- "Thread" (coroutine) handling system that allows different systems to run their main loops in separate threads.
 
+local expect = require "cc.expect".expect
 local logging = require "logging"
 local thread_context = logging.create_context("Thready")
 
@@ -151,6 +152,7 @@ end
 --- Run the main loop of the thread system. Recommend using this with `parallel`.
 ---@see thready.parallel
 function thready.main_loop()
+  thready.running = true
   while thready.running do
     local event_data = table.pack(os.pullEvent())
 
