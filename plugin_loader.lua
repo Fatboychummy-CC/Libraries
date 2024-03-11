@@ -36,6 +36,9 @@ local plugin_loader = {
   unloaded = {},
 }
 
+---@type table<string, any>
+local exposed_data = {}
+
 --- Generate a custom thready instance for a plugin.
 ---@param set_name string The name of the set to create.
 ---@return plugin_thready
@@ -289,7 +292,9 @@ function plugin_loader.register_all()
 
       if data then
         local env = {}
-        env.loader = plugin_loader
+        env.loader = setmetatable({
+          request = function() error("Cannot request data from the loader outside init/run/teardown methods.", 2) end,
+        }, {__index = plugin_loader})
 
         -- Inject fake thready and logger objects.
         env.thready = setmetatable({}, {
@@ -335,6 +340,17 @@ function plugin_loader.register_all()
                 env.thready = make_thready(plugin_data.name)
                 -- And the same for the logger.
                 env.logger = logging.create_context(plugin_data.name)
+                -- And again for the plugin loader request system.
+                env.loader = setmetatable({
+                  request = function(name)
+                    if not exposed_data[name] then
+                      error("No data exposed by name " .. name, 2)
+                    end
+
+                    plugin_context.info(plugin_data.name, "requested data key", name)
+                    return exposed_data[name]
+                  end,
+                }, {__index = plugin_loader})
               else
                 plugin_context.error("Failed to register plugin", file, ":", err)
                 failures = failures + 1
@@ -361,6 +377,21 @@ function plugin_loader.register_all()
   end
 
   plugin_context.info("Registered", successes, "plugin(s) with", failures, "failure(s).")
+end
+
+--- Expose data to plugins, by name. Plugins must request this data by name (and requests will be logged).
+---@param name string The name of the data to expose.
+---@param data any The data to expose.
+function plugin_loader.expose(name, data)
+  expect(1, name, "string")
+  --
+
+  if exposed_data[name] then
+    plugin_context.warn("Overwriting exposed data", name)
+  end
+
+  exposed_data[name] = data
+  plugin_context.debug("Exposed data", name)
 end
 
 return plugin_loader
