@@ -202,21 +202,9 @@ function plugin_loader.run(...)
         if ok then
           -- Plugin load OK
           plugin_context.debug("Loaded plugin", name)
-          plugin_loader.loaded[name] = plugin_loader.unloaded[name]
-          plugin_loader.unloaded[name] = nil
         else
           -- Plugin load failed
           plugin_context.error("Failed to load plugin", name, ":", err)
-        end
-      end
-
-
-      -- Start all plugin main loops.
-      plugin_context.debug("Spawning all plugin main loops.")
-      for name, plugin in pairs(plugin_loader.loaded) do
-        if plugin.run then
-          plugin_context.debug("Spawning main loop for", name)
-          thready.spawn(name, plugin.run)
         end
       end
 
@@ -303,17 +291,22 @@ function plugin_loader.register_all()
         local env = {}
         env.loader = plugin_loader
 
+        -- Inject fake thready and logger objects.
         env.thready = setmetatable({}, {
           __index = function()
             error("Thready is not yet initialized, it will be available in your init/run/teardown methods.", 2)
+          end
+        })
+        env.logger = setmetatable({}, {
+          __index = function()
+            error("Logger is not yet initialized, it will be available in your init/run/teardown methods.", 2)
           end
         })
 
         setmetatable(env, {__index = _ENV})
 
         -- Compile the file.
-        local ok, func = pcall(
-          load,
+        local func, err = load(
           data,
           "@" .. fs.combine(plugins_folder.working_directory, file),
           "t",
@@ -321,9 +314,7 @@ function plugin_loader.register_all()
         )
 
         -- Check compilation errors.
-        if ok then
-          ---@cast func function
-
+        if func then
           -- Run the file.
           local _ok, plugin_data = pcall(func)
 
@@ -342,8 +333,8 @@ function plugin_loader.register_all()
 
                 -- Now we can properly inject thready into its environment.
                 env.thready = make_thready(plugin_data.name)
-
-                plugin_context.debug("Registered plugin", plugin_data.name)
+                -- And the same for the logger.
+                env.logger = logging.create_context(plugin_data.name)
               else
                 plugin_context.error("Failed to register plugin", file, ":", err)
                 failures = failures + 1
@@ -357,7 +348,7 @@ function plugin_loader.register_all()
             failures = failures + 1
           end
         else
-          plugin_context.error("Failed to register plugin", file, ":", func)
+          plugin_context.error("Failed to register plugin", file, ":", err)
           failures = failures + 1
         end
       else
