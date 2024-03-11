@@ -222,17 +222,23 @@ end
 --- Add a listener for a given event.
 ---@param event string The event to listen for.
 ---@param callback fun(event:string, ...:any) The callback to run when the event is received.
+---@return integer id The ID of the listener.
 function thready.listen(set_name, event, callback)
   expect(1, event, "string")
   expect(2, callback, "function")
   --
 
+  local id = gen_unique_id()
+  used_ids[id] = true
+
   table.insert(thready.listeners, {
     event = event,
     set_name = set_name,
     callback = callback,
-    id = gen_unique_id()
+    id = id
   })
+
+  return id
 end
 
 --- Remove a listener by its ID. This will not stop any currently running listeners.
@@ -244,6 +250,7 @@ function thready.remove_listener(id)
   for i = 1, #thready.listeners do
     if thready.listeners[i].id == id then
       table.remove(thready.listeners, i)
+      used_ids[id] = nil
       return
     end
   end
