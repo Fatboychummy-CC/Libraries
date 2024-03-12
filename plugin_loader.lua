@@ -327,33 +327,38 @@ function plugin_loader.register_all()
           if _ok then
             -- Check if the file returned anything.
             if type(plugin_data) == "table" then
-              -- Attempt to register the plugin.
-              local __ok, err = pcall(plugin_loader.register, plugin_data)
+              -- Ensure the plugin is enabled.
+              if not plugin_data.disabled then
+                -- Attempt to register the plugin.
+                local __ok, err = pcall(plugin_loader.register, plugin_data)
 
-              if __ok then
-                successes = successes + 1
+                if __ok then
+                  successes = successes + 1
 
-                -- Good! Store the plugin in the unloaded table.
-                plugin_loader.unloaded[plugin_data.name] = plugin_data
+                  -- Good! Store the plugin in the unloaded table.
+                  plugin_loader.unloaded[plugin_data.name] = plugin_data
 
-                -- Now we can properly inject thready into its environment.
-                env.thready = make_thready(plugin_data.name)
-                -- And the same for the logger.
-                env.logger = logging.create_context(plugin_data.name)
-                -- And again for the plugin loader request system.
-                env.loader = setmetatable({
-                  request = function(name)
-                    if not exposed_data[name] then
-                      error("No data exposed by name " .. name, 2)
-                    end
+                  -- Now we can properly inject thready into its environment.
+                  env.thready = make_thready(plugin_data.name)
+                  -- And the same for the logger.
+                  env.logger = logging.create_context(plugin_data.name)
+                  -- And again for the plugin loader request system.
+                  env.loader = setmetatable({
+                    request = function(name)
+                      if not exposed_data[name] then
+                        error("No data exposed by name " .. name, 2)
+                      end
 
-                    plugin_context.info(plugin_data.name, "requested data key", name)
-                    return exposed_data[name]
-                  end,
-                }, {__index = plugin_loader})
+                      plugin_context.info(plugin_data.name, "requested data key", name)
+                      return exposed_data[name]
+                    end,
+                  }, {__index = plugin_loader})
+                else
+                  plugin_context.error("Failed to register plugin", file, ":", err)
+                  failures = failures + 1
+                end
               else
-                plugin_context.error("Failed to register plugin", file, ":", err)
-                failures = failures + 1
+                plugin_context.info("Skipping disabled plugin", plugin_data.name)
               end
             else
               plugin_context.error("Failed to register plugin", file, ":", "Nothing returned by file.")
