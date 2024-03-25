@@ -25,7 +25,7 @@ local plugin_context = logging.create_context("Plugin")
 ---@field interval fun(interval:number, func:fun(...:any)):integer Spawn an interval for the plugin.
 
 ---@class plugin_loader
----@field plugins Plugin[] A table of plugin names.
+---@field plugins string[] A table of plugin names.
 ---@field loaded table<string, Plugin> A table of loaded plugins.
 ---@field unloaded table<string, Plugin> A table of unloaded plugins.
 ---@field running boolean Whether the plugin system is currently running.
@@ -198,18 +198,24 @@ function plugin_loader.run(...)
       end
 
       -- And then we can actually load them.
-      plugin_context.debug("Loading all plugins.")
+      plugin_context.debug("Generating loaders.")
+      local loaders = {}
       for _, name in ipairs(load_names) do
-        local ok, err = pcall(plugin_loader.load, name)
+        table.insert(loaders, function()
+          local ok, err = pcall(plugin_loader.load, name)
 
-        if ok then
-          -- Plugin load OK
-          plugin_context.debug("Loaded plugin", name)
-        else
-          -- Plugin load failed
-          plugin_context.error("Failed to load plugin", name, ":", err)
-        end
+          if ok then
+            -- Plugin load OK
+            plugin_context.debug("Loaded plugin", name)
+          else
+            -- Plugin load failed
+            plugin_context.error("Failed to load plugin", name, ":", err)
+          end
+        end)
       end
+
+      plugin_context.info("Loading", #loaders, "plugin(s) in parallel.")
+      parallel.waitForAll(table.unpack(loaders))
 
       -- Start all of the main loops.
       local main_loop_ids = {}
@@ -353,11 +359,16 @@ function plugin_loader.register_all()
                       return exposed_data[name]
                     end,
                     request_wait = function(name)
-                      plugin_context.info(plugin_data.name, "Wait for data key", name)
+                      plugin_context.info(plugin_data.name, "waiting for data key", name)
+                      local timer = os.startTimer(5)
                       while not exposed_data[name] do
-                        os.pullEvent("plugin-data-expose")
+                        local event, param = os.pullEvent()
+
+                        if event == "timer" and param == timer then
+                          plugin_context.warn(plugin_data.name, ": Infinite yield possible waiting for data field", name)
+                        end
                       end
-                      plugin_context.info(plugin_data.name, "Received data key", name)
+                      plugin_context.info(plugin_data.name, "received data key", name)
 
                       return exposed_data[name]
                     end,
