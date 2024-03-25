@@ -24,6 +24,10 @@ local plugin_context = logging.create_context("Plugin")
 ---@field listen fun(event_name:string, func:fun(event:string, ...:any)):integer Spawn a listener for the plugin.
 ---@field interval fun(interval:number, func:fun(...:any)):integer Spawn an interval for the plugin.
 
+---@class plugin_context_loader : plugin_loader
+---@field request fun(name:string):any Request data from the plugin loader.
+---@field request_wait fun(name:string, timeout:number?):any Request data from the plugin loader, waiting for it to be available for a maximum of `timeout` seconds.
+
 ---@class plugin_loader
 ---@field plugins string[] A table of plugin names.
 ---@field loaded table<string, Plugin> A table of loaded plugins.
@@ -358,13 +362,17 @@ function plugin_loader.register_all()
                       plugin_context.info(plugin_data.name, "requested data key", name)
                       return exposed_data[name]
                     end,
-                    request_wait = function(name)
+                    request_wait = function(name, timeout)
                       plugin_context.info(plugin_data.name, "waiting for data key", name)
-                      local timer = os.startTimer(5)
+                      local timer = os.startTimer(timeout or 5)
                       while not exposed_data[name] do
                         local event, param = os.pullEvent()
 
                         if event == "timer" and param == timer then
+                          if timeout then
+                            plugin_context.error(plugin_data.name, ": Timed out waiting for data field", name)
+                            return nil
+                          end
                           plugin_context.warn(plugin_data.name, ": Infinite yield possible waiting for data field", name)
                         end
                       end
