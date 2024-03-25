@@ -352,6 +352,15 @@ function plugin_loader.register_all()
                       plugin_context.info(plugin_data.name, "requested data key", name)
                       return exposed_data[name]
                     end,
+                    request_wait = function(name)
+                      plugin_context.info(plugin_data.name, "Wait for data key", name)
+                      while not exposed_data[name] do
+                        os.pullEvent("plugin-data-expose")
+                      end
+                      plugin_context.info(plugin_data.name, "Received data key", name)
+
+                      return exposed_data[name]
+                    end,
                   }, {__index = plugin_loader})
                 else
                   plugin_context.error("Failed to register plugin", file, ":", err)
@@ -397,6 +406,8 @@ function plugin_loader.expose(name, data)
 
   exposed_data[name] = data
   plugin_context.debug("Exposed data", name)
+
+  os.queueEvent("plugin-data-expose", name, data)
 end
 
 return plugin_loader
