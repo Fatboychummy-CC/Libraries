@@ -20,7 +20,7 @@ local plugin_context = logging.create_context("Plugin")
 ---@field teardown fun()? A function to run when the plugin is unloaded. Use this to clean up or save state.
 
 ---@class plugin_thready : thready
----@field spawn fun(func:fun()):integer Spawn a new thread for the plugin.
+---@field spawn fun(func:fun(), ...:any):integer Spawn a new thread for the plugin.
 ---@field listen fun(event_name:string, func:fun(event:string, ...:any)):integer Spawn a listener for the plugin.
 ---@field interval fun(interval:number, func:fun(...:any)):integer Spawn an interval for the plugin.
 
