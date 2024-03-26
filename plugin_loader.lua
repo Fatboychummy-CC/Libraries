@@ -49,9 +49,9 @@ local exposed_data = {}
 local function make_thready(set_name)
   local thready_instance = setmetatable(
     {
-      spawn = function(func)
+      spawn = function(func, ...)
         plugin_context.debug("Spawning thread for", set_name)
-        return thready.spawn(set_name, func)
+        return thready.spawn(set_name, func, ...)
       end,
       listen = function(event_name, func)
         plugin_context.debug("Spawning listener for", event_name, "in", set_name)
