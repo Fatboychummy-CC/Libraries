@@ -22,6 +22,12 @@ function smn.set_modem(modem_side)
   modem = tmp
 end
 
+--- Get the name of the modem in use.
+---@return string? name The name of the modem.
+function smn.get_modem()
+  return modem and peripheral.getName(modem)
+end
+
 --- Find a peripheral on the network.
 ---@param type string The type of peripheral to find.
 ---@return wrappedPeripheral? ... The found peripherals. 
