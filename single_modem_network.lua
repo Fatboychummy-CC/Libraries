@@ -22,20 +22,29 @@ function smn.set_modem(modem_side)
   modem = tmp
 end
 
+--- Get the name of the modem in use.
+---@return string? name The name of the modem.
+function smn.get_modem()
+  return modem and peripheral.getName(modem)
+end
+
 --- Find a peripheral on the network.
 ---@param type string The type of peripheral to find.
+---@param filter_func nil|fun(name: string, wrapped: table?): boolean? A function to filter the peripherals.
 ---@return wrappedPeripheral? ... The found peripherals. 
-function smn.find(type)
+function smn.find(type, filter_func)
   if not modem then
     error("No modem set.", 2)
   end
+
+  filter_func = filter_func or function() return true end
 
   local names = modem.getNamesRemote()
 
   local found = {}
 
   for _, name in ipairs(names) do
-    if modem.hasTypeRemote(name, type) then
+    if modem.hasTypeRemote(name, type) and filter_func(name, smn.wrap(name)) then
       table.insert(found, peripheral.wrap(name))
     end
   end
