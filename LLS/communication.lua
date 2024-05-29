@@ -1,4 +1,4 @@
----@meta
+---@meta communication
 
 ---@class packet
 ---@field protocol string Similar to the rednet system, these packets can be differentiated via a protocol string.
