@@ -284,15 +284,15 @@ function auth_root.comment.delete(id) end
 ---@field description_short string? A short description of the project.
 ---@field description string? A long description of the project.
 ---@field description_markdown string? A long description of the project, in Markdown format.
----@field has_thumbnail bool_integer Whether or not the project has a thumbnail.
----@field hide_thumbnail bool_integer Whether or not the thumbnail should be hidden.
+---@field has_thumbnail boolean Whether or not the project has a thumbnail.
+---@field hide_thumbnail boolean Whether or not the thumbnail should be hidden.
 ---@field media_count integer The number of media items for the project.
 ---@field keywords string A list of keywords for the project, comma-separated.
 ---@field downloads integer The number of downloads for the project.
 ---@field downloads_recent integer The number of downloads for the project in the last 30 days.
 ---@field views integer The number of views for the project.
 ---@field views_recent integer The number of views for the project in the last 30 days.
----@field visible bool_integer Whether or not the project is visible.
+---@field visible boolean Whether or not the project is visible.
 
 ---@class pine_store-comment
 ---@field id integer The ID of the comment.
@@ -323,13 +323,13 @@ function auth_root.comment.delete(id) end
 
 ---@class pine_store-user_options
 ---@field user_discord string The Discord ID of the user.
----@field discord_notifications bool_integer Whether or not to send notifications to Discord.
----@field discord_noti_comment bool_integer Whether or not to send notifications to Discord for comments.
----@field discord_noti_reply bool_integer Whether or not to send notifications to Discord for replies.
----@field discord_noti_newfollow_user bool_integer Whether or not to send notifications to Discord for new followers.
----@field discord_noti_newfollow_project bool_integer Whether or not to send notifications to Discord for new followers of projects.
----@field discord_noti_following_newproject bool_integer Whether or not to send notifications to Discord for new projects from followed users.
----@field discord_noti_following_projectupdate bool_integer Whether or not to send notifications to Discord for updates from followed projects.
+---@field discord_notifications boolean Whether or not to send notifications to Discord.
+---@field discord_noti_comment boolean Whether or not to send notifications to Discord for comments.
+---@field discord_noti_reply boolean Whether or not to send notifications to Discord for replies.
+---@field discord_noti_newfollow_user boolean Whether or not to send notifications to Discord for new followers.
+---@field discord_noti_newfollow_project boolean Whether or not to send notifications to Discord for new followers of projects.
+---@field discord_noti_following_newproject boolean Whether or not to send notifications to Discord for new projects from followed users.
+---@field discord_noti_following_projectupdate boolean Whether or not to send notifications to Discord for updates from followed projects.
 
 ---@alias pine_store-connection_type
 ---| '"discord"' # Discord
@@ -341,10 +341,6 @@ function auth_root.comment.delete(id) end
 ---| '"steam"' # Steam
 ---| '"link"' # Some other url
 ---| string # Pinestore may add other types, this is to prevent warnings when those are used.
-
----@alias bool_integer
----| '1'
----| '0'
 
 -- ########################################################################## --
 --                             Request objects                                --
