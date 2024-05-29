@@ -279,7 +279,7 @@ function auth_root.comment.delete(id) end
 ---@field install_command string? The command to run to install the project. If this is nil, download_url must exist.
 ---@field download_url string? The URL to download the project from. If this is nil, install_command must exist.
 ---@field target_file string? The file to run after installation is complete.
----@field tags string A list of tags for the project, comma-separated. This may change to be an array in the future.
+---@field tags string[] A list of tags for the project.
 ---@field repository string? The URL to the repository for the project.
 ---@field description_short string? A short description of the project.
 ---@field description string? A long description of the project.
@@ -287,7 +287,7 @@ function auth_root.comment.delete(id) end
 ---@field has_thumbnail boolean Whether or not the project has a thumbnail.
 ---@field hide_thumbnail boolean Whether or not the thumbnail should be hidden.
 ---@field media_count integer The number of media items for the project.
----@field keywords string A list of keywords for the project, comma-separated.
+---@field keywords string[] A list of keywords for the project.
 ---@field downloads integer The number of downloads for the project.
 ---@field downloads_recent integer The number of downloads for the project in the last 30 days.
 ---@field views integer The number of views for the project.
@@ -369,11 +369,11 @@ function auth_root.comment.delete(id) end
 ---@field install_command string? The command to run to install the project.
 ---@field download_url string? The URL to download the project from.
 ---@field target_file string? The file to run after installation is complete.
----@field tags string? A list of tags for the project, comma-separated.
+---@field tags string[]? A list of tags for the project.
 ---@field repository string? The URL to the repository for the project.
 ---@field description_short string? A short description of the project.
 ---@field description string? A long description of the project.
 ---@field description_markdown string? A long description of the project, in Markdown format.
----@field keywords string? A list of keywords for the project, comma-separated.
+---@field keywords string[]? A list of keywords for the project.
 ---@field visible boolean? Whether or not the project is visible.
 ---@field date_release integer? The UNIX timestamp corresponding to when the project will be released, for a countdown timer.

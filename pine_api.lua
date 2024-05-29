@@ -276,19 +276,73 @@ function pine_api.auth.project.update(project_data)
     field(project_data, "install_command", "string", "nil")
     field(project_data, "download_url", "string", "nil")
     field(project_data, "target_file", "string", "nil")
-    field(project_data, "tags", "string", "nil")
+    field(project_data, "tags", "table", "nil")
     field(project_data, "repository", "string", "nil")
     field(project_data, "description_short", "string", "nil")
     field(project_data, "description", "string", "nil")
     field(project_data, "description_markdown", "string", "nil")
-    field(project_data, "keywords", "string", "nil")
+    field(project_data, "keywords", "table", "nil")
     field(project_data, "visible", "boolean", "nil")
     field(project_data, "date_release", "number", "nil")
+
+    local function validate_array(arr)
+      local max_n = 0
+      for k in pairs(arr) do
+        if type(k) ~= "number" then
+          error("Array contains non-integer key: " .. tostring(k), 0)
+        end
+
+        if k > max_n then
+          max_n = k
+        end
+      end
+
+      -- Now ensure we can count to `max_n` without any holes.
+      for i = 1, max_n do
+        if arr[i] == nil then
+          error("Array contains hole at index " .. i, 0)
+        end
+      end
+    end
+
+    -- Validate `tags` and `keywords` -- they should be string[]
+    if project_data.tags then
+      validate_array(project_data.tags)
+
+      local ok2, err2 = pcall(function()
+        for i, tag in ipairs(project_data.tags) do
+          if type(tag) ~= "string" then
+            error("Element at index " .. i .. " is not a string", 0)
+          end
+        end
+      end)
+      if not ok2 then
+        error("Field 'tags': " .. err2, 0)
+      end
+
+      validate_array(project_data.tags)
+    end
+
+    if project_data.keywords then
+      validate_array(project_data.keywords)
+
+      local ok2, err2 = pcall(function()
+        for i, keyword in ipairs(project_data.keywords) do
+          if type(keyword) ~= "string" then
+            error("Element at index " .. i .. " is not a string", 0)
+          end
+        end
+      end)
+      if not ok2 then
+        error("Field 'keywords': " .. err2, 0)
+      end
+    end
   end)
 
   if not ok then
     -- We shouldn't need a whole lot more information here.
     -- Just supply the error and make sure it's known that its the caller's fault.
+    -- For some reason `field` does not do this.
     error(err, 2)
   end
 
