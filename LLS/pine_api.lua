@@ -6,6 +6,14 @@
 ---@field user pine_store-user_root
 ---@field log pine_store-log_root
 ---@field auth pine_store-auth_root
+local pine_store_base = {}
+
+--- Set the authorization token.
+---@param token string The token to use.
+function pine_store_base.set_token(token) end
+
+--- Clear the authorization token.
+function pine_store_base.wipe_token() end
 
 -- ########################################################################## --
 --                               Non-authorized                               --

@@ -181,6 +181,16 @@ end
 --                                 Authorized                                 --
 -- ########################################################################## --
 
+function pine_api.set_token(token)
+  expect(1, token, "string")
+
+  auth_token = token
+end
+
+function pine_api.wipe_token()
+  auth_token = nil
+end
+
 
 -- ################################################################ --
 --                             profile                              --
