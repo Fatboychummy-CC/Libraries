@@ -436,13 +436,117 @@ end
 --- Create a lookup table of the closest CC color to each color in the BMP color table.
 ---@param data bmp-image The BMP data to create the lookup table for.
 ---@param palette_func nil|fun(color:integer):number,number,number The function to get the RGB values for a CC color index. For example, you might pass `term.getPaletteColor` or `term.nativePaletteColor` as this argument. Defaults to `term.getPaletteColor`.
+---@param refill boolean? For BMP files which have more than 16 colors, this will allow multiple colors to be mapped to the same CC color. Defaults to false.
+---@param gfxmode boolean? Whether to use the CraftOS-PC Graphics Mode's 256-color palette. Defaults to false.
+---@param gfxmode_add_colors boolean? If gfxmode is true, this being true will allow creation of colors in CraftOS-PC's palette. Defaults to false.
 ---@return table<integer, integer> lookup_table The lookup table, indexed by BMP color index, with the value being the closest CC color index.
-function bmp.create_color_lookup_table(data, palette_func)
+function bmp.create_color_lookup_table(data, palette_func, refill, gfxmode, gfxmode_add_colors)
   expect(1, data, "table")
   expect(2, palette_func, "function", "nil")
+  expect(3, refill, "boolean", "nil")
+  expect(4, gfxmode, "boolean", "nil")
+  expect(5, gfxmode_add_colors, "boolean", "nil")
   palette_func = palette_func or term.getPaletteColor
 
-  error("Not implemented.", 2)
+  if type(gfxmode) == "boolean" or type(gfxmode_add_colors) == "boolean" then
+    error("gfxmode args not yet implemented.", 2)
+  end
+
+
+  local colors_lookup = {}
+  local lookup_table = {}
+
+  --- Create a lookup table of CC's 16 color indexes to their RGB values, in 0-255 instead of 0-1.
+  local function create_lookup()
+    for i = 0, 15 do
+      local lookup_data = {palette_func(2^i)}
+
+      for j = 1, 3 do
+        lookup_data[j] = math.floor(lookup_data[j] * 255)
+      end
+
+      colors_lookup[2^i] = lookup_data
+    end
+  end
+
+  create_lookup()
+
+  -- Create a copy of the BMP color table.
+  local color_table = {}
+  for i = 0, data.colors_used - 1 do
+    local color = data.color_table[i]
+    color_table[i] = {color[1], color[2], color[3]}
+  end
+
+  -- Go over every color then check and store which is the closest CC color (and distance).
+  -- Once complete, store the closest color in the lookup table and remove it from the colors_lookup table.
+  -- Repeat until all colors are matched.
+  local function reduce()
+    local closest_cc_color = 0
+    local closest_color = 0
+    local closest_distance = math.huge
+
+    -- For each CC color index...
+    for i = 0, 15 do
+      -- Get the RGB values for the CC color.
+      local cc_color = 2^i
+      local cc_data = colors_lookup[cc_color]
+
+      -- If the CC color exists...
+      if cc_data then
+        -- For each color in the BMP color table...
+        for j = 0, data.colors_used - 1 do
+          -- Get the RGB values for the BMP color.
+          local color = color_table[j]
+
+          -- If the BMP color exists...
+          if color then
+            -- Calculate the distance between the two colors.
+            local distance = 0
+
+            for k = 1, 3 do
+              -- We add the square of the difference between the two colors.
+              distance = distance + (color[k] - cc_data[k]) ^ 2
+            end
+
+            -- If the distance is less than the closest distance, update the closest color.
+            if distance < closest_distance then
+              closest_distance = distance
+              closest_color = j
+              closest_cc_color = cc_color
+            end
+          end
+        end
+
+        -- If the closest distance is 0, we can stop looking, we've found an exact match.
+        if closest_distance == 0 then
+          break
+        end
+      end
+    end
+
+    -- Store the closest color in the lookup table and remove it from the color table.
+    lookup_table[closest_color] = closest_cc_color
+    color_table[closest_color] = nil
+    colors_lookup[closest_cc_color] = nil
+  end
+
+  -- Go over every color in the BMP color table, reducing the colors until all are matched.
+  -- Yes this is probably inefficient as all hell. Want to make it better?
+  -- PRs welcome.
+  while next(color_table) do
+    reduce()
+
+    if not next(colors_lookup) then
+      if not refill then
+        error("Not enough colors in the palette to match all colors in the BMP color table.", 2)
+      end
+
+      create_lookup()
+    end
+  end
+
+  return lookup_table
 end
 
 return bmp
