@@ -69,9 +69,71 @@ suite.suite "Pine API - Project Endpoint"
     local ok, response = pine_api.project.info(99999999999)
     ASSERT_FALSE(ok)
     ASSERT_TYPE(response, "string")
+    PASS(response)
   end)
-  "GET comments" (function()
-    PASS("Not yet implemented")
+  "Comments have correct data" (function()
+    -- We need to get the owner ID of the project so we can test the comments
+    -- (in case other people commented on the project for some reason)
+    local ok, response = pine_api.project.info(PINE_TEST_DATA.target_project_id)
+    if not ok then
+      END("Failed to get project info: " .. response)
+    end
+    ASSERT_TYPE(response, "table")
+    ASSERT_TYPE(response.project, "table")
+    ASSERT_TYPE(response.project.owner_discord, "string")
+    local discord = response.project.owner_discord
+
+    -- Get the comments list.
+    local ok, response = pine_api.project.comments(PINE_TEST_DATA.target_project_id)
+    if not ok then
+      END("Failed to get project comments: " .. response)
+    end
+    ASSERT_TRUE(response.success)
+    ASSERT_TYPE(response, "table")
+    ASSERT_TYPE(response.comments, "table")
+
+    local base_comment_id, response_reply_id
+
+    -- Check the comments list for our predefined comments.
+    for _, comment in ipairs(response.comments) do
+      ASSERT_TYPE(comment, "table")
+      EXPECT_TYPE(comment.id, "number")
+      EXPECT_TYPE(comment.user_discord, "string")
+      EXPECT_TYPE(comment.user_name, "string")
+      EXPECT_TYPE(comment.body, "string")
+      EXPECT_TYPE(comment.timestamp, "number")
+      EXPECT_TYPE(comment.reply_id, "number", "nil")
+      EXPECT_EQ(comment.project_id, PINE_TEST_DATA.target_project_id)
+
+      if PINE_TEST_DATA.comments[comment.body] == "base" then
+        base_comment_id = comment.id
+      elseif PINE_TEST_DATA.comments[comment.body] == "reply" then
+        response_reply_id = comment.reply_id
+      end
+    end
+
+    -- Check if the comments are as expected.
+    EXPECT_TYPE(base_comment_id, "number")
+    EXPECT_TYPE(response_reply_id, "number")
+    EXPECT_EQ(response_reply_id, base_comment_id)
+  end)
+  "Comments argument expectations" (function()
+    EXPECT_THROWS(pine_api.project.comments)
+    EXPECT_THROWS(pine_api.project.comments, "some string")
+    EXPECT_THROWS(pine_api.project.comments, {})
+    EXPECT_THROWS(pine_api.project.comments, function()end)
+    EXPECT_NO_THROW(pine_api.project.comments, PINE_TEST_DATA.target_project_id)
+  end)
+  "Comments fails on invalid project ID" (function()
+    local ok, response = pine_api.project.comments(99999999999)
+    EXPECT_FALSE(ok)
+    EXPECT_TYPE(response, "string")
+
+    if type(response) == "string" then
+      PASS(response)
+    end
+
+    FAIL(textutils.serialize(response))
   end)
   "GET changelog" (function()
     PASS("Not yet implemented")

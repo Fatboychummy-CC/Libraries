@@ -1,6 +1,11 @@
 _G.PINE_TEST_DATA = {
   target_project_id = nil, -- The test project ID
   authorization = nil, -- The authorization token to use for authed endpoints.
+  comments = {
+    -- Expectations for the body of comments.
+    ["This is a comment"] = "base", -- This comment should NOT have the `reply_id` field.
+    ["This is a reply-comment"] = "reply" -- This comment should have the `reply_id` field, and it should link to the comment above.
+  }
 }
 
 if type(PINE_TEST_DATA.target_project_id) ~= "number" then
