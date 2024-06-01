@@ -1,5 +1,5 @@
 _G.PINE_TEST_DATA = {
-  target_project_id = 87, -- The test project ID
+  target_project_id = nil, -- The test project ID
   authorization = nil, -- The authorization token to use for authed endpoints.
 }
 
