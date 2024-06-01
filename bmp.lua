@@ -436,14 +436,14 @@ end
 --- Create a lookup table of the closest CC color to each color in the BMP color table.
 ---@param data bmp-image The BMP data to create the lookup table for.
 ---@param palette_func nil|fun(color:integer):number,number,number The function to get the RGB values for a CC color index. For example, you might pass `term.getPaletteColor` or `term.nativePaletteColor` as this argument. Defaults to `term.getPaletteColor`.
----@param refill boolean? For BMP files which have more than 16 colors, this will allow multiple colors to be mapped to the same CC color. Defaults to false.
+---@param allow_same boolean? For BMP files which have more than 16 colors, this will allow multiple colors to be mapped to the same CC color. Defaults to false.
 ---@param gfxmode boolean? Whether to use the CraftOS-PC Graphics Mode's 256-color palette. Defaults to false.
 ---@param gfxmode_add_colors boolean? If gfxmode is true, this being true will allow creation of colors in CraftOS-PC's palette. Defaults to false.
 ---@return table<integer, integer> lookup_table The lookup table, indexed by BMP color index, with the value being the closest CC color index.
-function bmp.create_color_lookup_table(data, palette_func, refill, gfxmode, gfxmode_add_colors)
+function bmp.create_color_lookup_table(data, palette_func, allow_same, gfxmode, gfxmode_add_colors)
   expect(1, data, "table")
   expect(2, palette_func, "function", "nil")
-  expect(3, refill, "boolean", "nil")
+  expect(3, allow_same, "boolean", "nil")
   expect(4, gfxmode, "boolean", "nil")
   expect(5, gfxmode_add_colors, "boolean", "nil")
   palette_func = palette_func or term.getPaletteColor
@@ -528,7 +528,10 @@ function bmp.create_color_lookup_table(data, palette_func, refill, gfxmode, gfxm
     -- Store the closest color in the lookup table and remove it from the color table.
     lookup_table[closest_color] = closest_cc_color
     color_table[closest_color] = nil
-    colors_lookup[closest_cc_color] = nil
+
+    if not allow_same then
+      colors_lookup[closest_cc_color] = nil
+    end
   end
 
   -- Go over every color in the BMP color table, reducing the colors until all are matched.
@@ -538,7 +541,7 @@ function bmp.create_color_lookup_table(data, palette_func, refill, gfxmode, gfxm
     reduce()
 
     if not next(colors_lookup) then
-      if not refill then
+      if not allow_same then
         error("Not enough colors in the palette to match all colors in the BMP color table.", 2)
       end
 
