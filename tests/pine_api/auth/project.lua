@@ -4,5 +4,5 @@ local pine_api = require "pine_api" --[[@as pine_store-base]]
 
 suite.suite "Pine API - Authed Project Endpoint"
   "PASS" (function()
-    PASS()
+    PASS("Not yet implemented")
   end)

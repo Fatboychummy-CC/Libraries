@@ -3,6 +3,9 @@
 local pine_api = require "pine_api" --[[@as pine_store-base]]
 
 suite.suite "Pine API - User Endpoint"
-  "PASS" (function()
-    PASS()
+  "GET info" (function()
+    PASS("Not yet implemented")
+  end)
+  "GET projects" (function()
+    PASS("Not yet implemented")
   end)

@@ -3,6 +3,12 @@
 local pine_api = require "pine_api" --[[@as pine_store-base]]
 
 suite.suite "Pine API - Projects Endpoint"
-  "PASS" (function()
-    PASS()
+  "GET list" (function()
+    PASS("Not yet implemented")
+  end)
+  "GET search" (function()
+    PASS("Not yet implemented")
+  end)
+  "GET named" (function()
+    PASS("Not yet implemented")
   end)

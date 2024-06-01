@@ -3,6 +3,9 @@
 local pine_api = require "pine_api" --[[@as pine_store-base]]
 
 suite.suite "Pine API - Log Endpoint"
-  "PASS" (function()
-    PASS()
+  "log view" (function()
+    PASS("Not yet implemented")
+  end)
+  "log download" (function()
+    PASS("Not yet implemented")
   end)
