@@ -3,8 +3,9 @@ _G.PINE_TEST_DATA = {
   authorization = nil, -- The authorization token to use for authed endpoints.
   comments = {
     -- Expectations for the body of comments.
-    ["This is a comment"] = "base", -- This comment should NOT have the `reply_id` field.
-    ["This is a reply-comment"] = "reply" -- This comment should have the `reply_id` field, and it should link to the comment above.
+    -- If you are testing with your own project, you can change these to match your comments.
+    ["This is a comment"] = "base", -- This comment should NOT have the `reply_id` field. It should be a top-level comment.
+    ["This is a reply-comment"] = "reply" -- This comment should have the `reply_id` field, and it should link to the comment above (it should be a reply to the above comment).
   }
 }
 

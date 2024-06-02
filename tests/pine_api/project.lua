@@ -58,6 +58,8 @@ suite.suite "Pine API - Project Endpoint"
     EXPECT_TYPE(response.project.target_file, "string")
     EXPECT_TYPE(response.project.repository, "string")
   end)
+
+
   "Info argument expectations" (function()
     EXPECT_THROWS(pine_api.project.info)
     EXPECT_THROWS(pine_api.project.info, "some string")
@@ -65,12 +67,21 @@ suite.suite "Pine API - Project Endpoint"
     EXPECT_THROWS(pine_api.project.info, function()end)
     EXPECT_NO_THROW(pine_api.project.info, PINE_TEST_DATA.target_project_id)
   end)
+
+
   "Info fails on invalid project ID" (function()
     local ok, response = pine_api.project.info(99999999999)
+
+    if ok then
+      END(textutils.serialize(response))
+    end
+
     ASSERT_FALSE(ok)
     ASSERT_TYPE(response, "string")
     PASS(response)
   end)
+
+
   "Comments have correct data" (function()
     -- We need to get the owner ID of the project so we can test the comments
     -- (in case other people commented on the project for some reason)
@@ -117,6 +128,8 @@ suite.suite "Pine API - Project Endpoint"
     EXPECT_TYPE(response_reply_id, "number")
     EXPECT_EQ(response_reply_id, base_comment_id)
   end)
+
+
   "Comments argument expectations" (function()
     EXPECT_THROWS(pine_api.project.comments)
     EXPECT_THROWS(pine_api.project.comments, "some string")
@@ -124,20 +137,95 @@ suite.suite "Pine API - Project Endpoint"
     EXPECT_THROWS(pine_api.project.comments, function()end)
     EXPECT_NO_THROW(pine_api.project.comments, PINE_TEST_DATA.target_project_id)
   end)
+
+
   "Comments fails on invalid project ID" (function()
     local ok, response = pine_api.project.comments(99999999999)
-    EXPECT_FALSE(ok)
-    EXPECT_TYPE(response, "string")
 
-    if type(response) == "string" then
-      PASS(response)
+    if ok then
+      END(textutils.serialize(response))
     end
 
-    FAIL(textutils.serialize(response))
+    ASSERT_FALSE(ok)
+    ASSERT_TYPE(response, "string")
+    PASS(response)
   end)
-  "GET changelog" (function()
-    PASS("Not yet implemented")
+
+
+  "Changelog has correct data" (function()
+    local ok, response = pine_api.project.changelog(PINE_TEST_DATA.target_project_id)
+    if not ok then
+      END("Failed to get project changelog: " .. response)
+    end
+    ASSERT_TRUE(response.success)
+    ASSERT_TYPE(response, "table")
+    ASSERT_TYPE(response.changelog, "table")
+
+    EXPECT_TYPE(response.changelog.project_id, "number")
+    EXPECT_EQ(response.changelog.project_id, PINE_TEST_DATA.target_project_id)
+    EXPECT_TYPE(response.changelog.timestamp, "number")
+    EXPECT_TYPE(response.changelog.body, "string")
   end)
-  "GET changelogs" (function()
-    PASS("Not yet implemented")
+
+
+  "Changelog argument expectations" (function()
+    EXPECT_THROWS(pine_api.project.changelog)
+    EXPECT_THROWS(pine_api.project.changelog, "some string")
+    EXPECT_THROWS(pine_api.project.changelog, {})
+    EXPECT_THROWS(pine_api.project.changelog, function()end)
+    EXPECT_NO_THROW(pine_api.project.changelog, PINE_TEST_DATA.target_project_id)
+  end)
+
+
+  "Changelog fails on invalid project ID" (function()
+    local ok, response = pine_api.project.changelog(99999999999)
+
+    if ok then
+      END(textutils.serialize(response))
+    end
+
+    ASSERT_FALSE(ok)
+    ASSERT_TYPE(response, "string")
+    PASS(response)
+  end)
+
+
+  "Changelogs has correct data" (function()
+    local ok, response = pine_api.project.changelogs(PINE_TEST_DATA.target_project_id)
+    if not ok then
+      END("Failed to get project changelogs: " .. response)
+    end
+    ASSERT_TRUE(response.success)
+    ASSERT_TYPE(response, "table")
+    ASSERT_TYPE(response.changelogs, "table")
+
+    for _, changelog in ipairs(response.changelogs) do
+      ASSERT_TYPE(changelog, "table")
+      EXPECT_TYPE(changelog.project_id, "number")
+      EXPECT_EQ(changelog.project_id, PINE_TEST_DATA.target_project_id)
+      EXPECT_TYPE(changelog.timestamp, "number")
+      EXPECT_TYPE(changelog.body, "string")
+    end
+  end)
+
+
+  "Changelogs argument expectations" (function()
+    EXPECT_THROWS(pine_api.project.changelogs)
+    EXPECT_THROWS(pine_api.project.changelogs, "some string")
+    EXPECT_THROWS(pine_api.project.changelogs, {})
+    EXPECT_THROWS(pine_api.project.changelogs, function()end)
+    EXPECT_NO_THROW(pine_api.project.changelogs, PINE_TEST_DATA.target_project_id)
+  end)
+
+
+  "Changelogs fails on invalid project ID" (function()
+    local ok, response = pine_api.project.changelogs(99999999999)
+
+    if ok then
+      END(textutils.serialize(response))
+    end
+
+    ASSERT_FALSE(ok)
+    ASSERT_TYPE(response, "string")
+    PASS(response)
   end)
