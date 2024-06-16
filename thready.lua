@@ -259,6 +259,7 @@ function thready.spawn(set_name, thread_fun, ...)
 
   thread_context.debug(("Spawning thread id %d in set %s."):format(id, set_name))
   table.insert(thready.coroutines[set_name], coro_data)
+  os.queueEvent("thready_spawn") -- resume the main loop
   return id
 end
 
