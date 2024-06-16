@@ -309,6 +309,35 @@ function thready.remove_listener(id)
   thread_context.warn(("Attempted to remove listener id %d, but it does not exist."):format(id))
 end
 
+--- Get information about a thread.
+---@param id integer The ID of the thread to get information about.
+---@return thread_data|nil data The data of the thread, or nil if the thread does not exist.
+function thready.get_thread(id)
+  expect(1, id, "number")
+  --
+
+  for _, coros in pairs(thready.coroutines) do
+    for _, coro in ipairs(coros) do
+      if coro.id == id then
+        return coro
+      end
+    end
+  end
+
+  return nil
+end
+
+--- Check if a thread is alive.
+---@param id integer The ID of the thread to check.
+---@return boolean alive Whether the thread is alive.
+function thready.is_alive(id)
+  expect(1, id, "number")
+  --
+
+  local coro = thready.get_thread(id)
+  return coro and coro.status ~= "dead" and coro.alive or false
+end
+
 --- Kill a thread.
 ---@param id integer The ID of the thread to kill.
 function thready.kill(id)
