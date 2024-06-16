@@ -2,6 +2,8 @@
 
 local expect = require "cc.expect".expect
 
+local init_time = os.epoch "utc"
+
 ---@class logging
 local logging = {
   ---@enum logging-log_level
@@ -22,7 +24,7 @@ local log_lines = {
   n = 0
 }
 
-local log_file_formatter = "[%s][%s] %s"
+local log_file_formatter = "[%d][%s][%s] %s"
 local log_formatter = "[%s][%s] "
 local level_text_formatter = "0%s00%s00"
 
@@ -60,6 +62,7 @@ local function log(context, level, level_name, ...)
 
     log_lines.n = log_lines.n + 1
     log_lines[log_lines.n] = log_file_formatter:format(
+      os.epoch "utc" - init_time,
       level_name,
       context,
       combined
@@ -100,6 +103,12 @@ function logging.create_context(name)
   ---@param ... any The values to be included in the log. Concatenated with a space.
   function context.log(level, level_name, ...)
     log(name, level, level_name, ...)
+
+    if level == logging.LOG_LEVEL.WARN then
+      warned = true
+    elseif level >= logging.LOG_LEVEL.ERROR then
+      errored = true
+    end
   end
 
   --- Send a debug message to the log.
@@ -118,16 +127,19 @@ function logging.create_context(name)
   ---@param ... any The values to be included in the log. Concatenated with a space.
   function context.warn(...)
     log(name, logging.LOG_LEVEL.WARN, "WARN", ...)
+    warned = true
   end
 
   --- Send an error to the log.
   ---@param ... any The values to be included in the log. Concatenated with a space.
   function context.error(...)
     log(name, logging.LOG_LEVEL.ERROR, "ERROR", ...)
+    errored = true
   end
 
   function context.fatal(...)
     log(name, logging.LOG_LEVEL.FATAL, "FATAL", ...)
+    errored = true
   end
 
   return setmetatable(context, logging)
