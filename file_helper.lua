@@ -154,7 +154,7 @@ function file:unserialize(filename, default)
   local h = io.open(fs.combine(self.working_directory, filename), 'r')
 
   if not h then
-    return default or ""
+    return default
   end
 
   local data = textutils.unserialise(h:read "*a")
