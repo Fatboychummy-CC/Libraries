@@ -76,6 +76,10 @@ function blit_util.combine(...)
     end
   end
 
+  if #fixed_args % 3 ~= 0 then
+    error("Total argument count (after table explosion) not divisible by 3.", 2)
+  end
+
   for i = 1, #fixed_args, 3 do
     local s1, s2, s3 = fixed_args[i], fixed_args[i + 1], fixed_args[i + 2]
     expect(i, s1, "string")
