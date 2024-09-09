@@ -13,7 +13,7 @@ function performance.measure(func, ...)
   local start = epoch "nano" ---@diagnostic disable-line:param-type-mismatch
   func(...)
   local finish = epoch "nano" ---@diagnostic disable-line:param-type-mismatch
-  return (finish - start) * 1000
+  return (finish - start) / 1e6
 end
 
 --- Measures the time it takes to run a function n times.
@@ -29,13 +29,10 @@ function performance.measure_n(func, n, ...)
   local max_milliseconds = -math.huge
   local total_milliseconds = 0
 
+  local measure = performance.measure
+
   for _ = 1, n do
-    -- performance.measure will have some overhead, so we'll just copy the code
-    -- here.
-    local start = epoch "nano" ---@diagnostic disable-line:param-type-mismatch
-    func(...)
-    local finish = epoch "nano" ---@diagnostic disable-line:param-type-mismatch
-    local milliseconds = (finish - start) / 1e6
+    local milliseconds = measure(func, ...)
 
     min_milliseconds = min(min_milliseconds, milliseconds)
     max_milliseconds = max(max_milliseconds, milliseconds)
