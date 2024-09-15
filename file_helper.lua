@@ -1,5 +1,7 @@
 local expect = require "cc.expect".expect --[[@as fun(arg_n: number, value: any, ...: string)]]
 
+local fs = fs
+
 ---@class file_helper
 local file = {
   working_directory = fs.getDir(shell.getRunningProgram())
