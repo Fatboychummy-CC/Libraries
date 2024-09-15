@@ -1,7 +1,5 @@
 local expect = require "cc.expect".expect --[[@as fun(arg_n: number, value: any, ...: string)]]
 
-local fs = fs
-
 ---@class file_helper
 local file = {
   working_directory = fs.getDir(shell.getRunningProgram())
@@ -384,61 +382,6 @@ function file:copy(from, to)
   expect(2, to, "string")
 
   fs.copy(fs.combine(self.working_directory, from), fs.combine(self.working_directory, to))
-end
-
---- Return an object that can be used as an `fs` library replacement.
----@return fs_object fs_object The object that can be used as an `fs` library replacement.
-function file:as_fs_object()
-  local fs = fs
-
-  self = self or file
-
-  ---@class fs_object
-  local fs_object = {
-    --- Combine two or more paths.
-    combine = fs.combine,
-
-    --- Check if a file exists.
-    exists = self.exists,
-
-    --- Get the list of files and directories in a directory.
-    list = self.list,
-
-    --- Check if a path is a directory.
-    isDir = self.is_directory,
-
-    --- Check if a path is read-only.
-    isReadOnly = self.is_read_only,
-
-    --- Get the directory a file is stored in.
-    getDir = self.get_dir,
-
-    --- Get the name of a file.
-    getName = self.get_name,
-
-    --- Get the size of a file.
-    getSize = self.get_size,
-
-    --- Get the free space in a directory.
-    getFreeSpace = self.get_free_space,
-
-    --- Get the used space in a directory.
-    makeDir = self.make_dir,
-
-    --- Move a file.
-    move = self.move,
-
-    --- Copy a file.
-    copy = self.copy,
-
-    --- Delete a file.
-    delete = self.delete,
-
-    --- Open a file.
-    open = self.open
-  }
-
-  return fs_object
 end
 
 return file
