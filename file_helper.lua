@@ -389,6 +389,8 @@ end
 function file:as_fs_object()
   local fs = fs
 
+  self = self or file
+
   ---@class fs_object
   local fs_object = {
     --- Combine two or more paths.
