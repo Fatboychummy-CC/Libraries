@@ -248,4 +248,21 @@ function file:is_directory(path)
   return fs.isDir(fs.combine(self.working_directory, path))
 end
 
+--- Open a file normally, alias to `fs.open(fs.combine(self.working_directory, filename), mode)`.
+---@param filename string The file to open.
+---@param mode string The mode to open the file in.
+---@return ReadHandle|WriteHandle|BinaryReadHandle|BinaryWriteHandle|nil handle The file handle, or nil if it could not be opened.
+function file:open(filename, mode)
+  if type(self) ~= "table" then -- shift arguments, not instanced.
+    filename = self --[[@as string]]
+    mode = filename --[[@as string]]
+    self = file --[[@as file_helper]]
+  end
+
+  expect(1, filename, "string")
+  expect(2, mode, "string")
+
+  return fs.open(fs.combine(self.working_directory, filename), mode)
+end
+
 return file
