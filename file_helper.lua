@@ -53,7 +53,7 @@ function file:get_all(filename, default)
     return default or ""
   end
 
-  local data = h:read "*a"
+  local data = h:read "*a" ---@diagnostic disable-line guh
   h:close()
 
   return data
@@ -104,14 +104,15 @@ function file:append(filename, data)
 end
 
 --- Create an empty file (or empty the contents of an existing file).
----@param filename string The file to write to.
+---@param filename string? The file to write to.
 function file:empty(filename)
   if type(self) ~= "table" then -- shift arguments, not instanced.
     filename = self --[[@as string]]
     self = file --[[@as file_helper]]
   end
 
-  expect(1, filename, "string")
+  expect(1, filename, "string", "nil")
+  filename = filename or ""
 
   fs.delete(fs.combine(self.working_directory, filename))
   local h, err = io.open(fs.combine(self.working_directory, filename), 'w')
@@ -143,7 +144,7 @@ function file:unserialize(filename, default)
     return default
   end
 
-  local data = textutils.unserialise(h:read "*a")
+  local data = textutils.unserialise(h:read "*a") ---@diagnostic disable-line guh
   h:close()
 
   return data
@@ -196,7 +197,7 @@ end
 -- ####################################################################
 
 --- Check if a file exists in the working directory. Shorthand for fs.exists(fs.combine(self.working_directory, filename)).
----@param filename string The file to check.
+---@param filename string? The file to check.
 ---@return boolean exists
 function file:exists(filename)
   if type(self) ~= "table" then -- shift arguments, not instanced.
@@ -204,20 +205,22 @@ function file:exists(filename)
     self = file --[[@as file_helper]]
   end
 
-  expect(1, filename, "string")
+  expect(1, filename, "string", "nil")
+  filename = filename or ""
 
   return fs.exists(fs.combine(self.working_directory, filename))
 end
 
 --- Delete a file in the working directory. This is a shorthand for fs.delete(fs.combine(self.working_directory, filename)).
----@param filename string The file to delete.
+---@param filename string? The file to delete.
 function file:delete(filename)
   if type(self) ~= "table" then -- shift arguments, not instanced.
     filename = self --[[@as string]]
     self = file --[[@as file_helper]]
   end
 
-  expect(1, filename, "string")
+  expect(1, filename, "string", "nil")
+  filename = filename or ""
 
   fs.delete(fs.combine(self.working_directory, filename))
 end
@@ -270,7 +273,7 @@ function file:open(filename, mode)
 end
 
 --- Check if a file is read-only. This is a shorthand for fs.isReadOnly(fs.combine(self.working_directory, filename)).
----@param path string The file path to check.
+---@param path string? The file path to check.
 ---@return boolean is_read_only
 function file:is_read_only(path)
   if type(self) ~= "table" then -- shift arguments, not instanced.
@@ -278,13 +281,14 @@ function file:is_read_only(path)
     self = file --[[@as file_helper]]
   end
 
-  expect(1, path, "string")
+  expect(1, path, "string", "nil")
+  path = path or ""
 
   return fs.isReadOnly(fs.combine(self.working_directory, path))
 end
 
 --- Get the directory a file is stored in. This is a shorthand for fs.getDir(fs.combine(self.working_directory, filename)).
----@param path string The file path to check.
+---@param path string? The file path to check.
 ---@return string directory
 function file:get_dir(path)
   if type(self) ~= "table" then -- shift arguments, not instanced.
@@ -292,13 +296,14 @@ function file:get_dir(path)
     self = file --[[@as file_helper]]
   end
 
-  expect(1, path, "string")
+  expect(1, path, "string", "nil")
+  path = path or ""
 
   return fs.getDir(fs.combine(self.working_directory, path))
 end
 
 --- Get the name of a file. This is a shorthand for fs.getName(fs.combine(self.working_directory, filename)).
----@param path string The file path to check.
+---@param path string? The file path to check.
 ---@return string name
 function file:get_name(path)
   if type(self) ~= "table" then -- shift arguments, not instanced.
@@ -306,13 +311,14 @@ function file:get_name(path)
     self = file --[[@as file_helper]]
   end
 
-  expect(1, path, "string")
+  expect(1, path, "string", "nil")
+  path = path or ""
 
   return fs.getName(fs.combine(self.working_directory, path))
 end
 
 --- Get the size of a file. This is a shorthand for fs.getSize(fs.combine(self.working_directory, filename)).
----@param path string The file path to check.
+---@param path string? The file path to check.
 ---@return integer size The size of the file, in bytes.
 function file:get_size(path)
   if type(self) ~= "table" then -- shift arguments, not instanced.
@@ -320,13 +326,14 @@ function file:get_size(path)
     self = file --[[@as file_helper]]
   end
 
-  expect(1, path, "string")
+  expect(1, path, "string", "nil")
+  path = path or ""
 
   return fs.getSize(fs.combine(self.working_directory, path))
 end
 
 --- Get the free space in the given directory. This is a shorthand for fs.getFreeSpace(fs.combine(self.working_directory, path)).
----@param path string The directory to check.
+---@param path string? The directory to check.
 ---@return integer|"unlimited" free_space The free space in the directory, in bytes.
 function file:get_free_space(path)
   if type(self) ~= "table" then -- shift arguments, not instanced.
@@ -334,20 +341,22 @@ function file:get_free_space(path)
     self = file --[[@as file_helper]]
   end
 
-  expect(1, path, "string")
+  expect(1, path, "string", "nil")
+  path = path or ""
 
   return fs.getFreeSpace(fs.combine(self.working_directory, path))
 end
 
 --- Make a directory in the working directory. This is a shorthand for fs.makeDir(fs.combine(self.working_directory, path)). 
----@param path string The directory to create.
+---@param path string? The directory to create.
 function file:make_dir(path)
   if type(self) ~= "table" then -- shift arguments, not instanced.
     path = self --[[@as string]]
     self = file --[[@as file_helper]]
   end
 
-  expect(1, path, "string")
+  expect(1, path, "string", "nil")
+  path = path or ""
 
   fs.makeDir(fs.combine(self.working_directory, path))
 end
