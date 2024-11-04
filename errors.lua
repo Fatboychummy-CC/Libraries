@@ -1,4 +1,8 @@
---- This file contains specific error definitions for the challenge runner.
+--- This file contains a set of functions that can be used to create custom
+--- errors, and errors with more details than the default Lua error function.
+--- 
+--- This module is released to the public domain under The Unlicense.
+--- Originally created by Fatboychummy.
 
 ---@class Errors
 local errors = {}
@@ -39,8 +43,8 @@ end
 
 ---@alias ErrorType
 ---| '"UserError"' # An error caused by the user.
----| '"InternalError"' # An error caused by the challenge runner itself.
----| '"ChallengeError"' # An error caused by the challenge itself.
+---| '"InternalError"' # An internal error.
+---| '"ChallengeError"' # An error caused by a challenge
 ---| '"NetworkError"' # An error caused by a network issue.
 ---| '"AuthenticationError"' # An error caused by authentication issues.
 ---| '"UnknownError"' # An error of unknown origin.
