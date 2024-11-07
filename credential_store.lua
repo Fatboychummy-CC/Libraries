@@ -477,11 +477,29 @@ end
 
 --- Get a basic username/password combo for a site. This will either use the encrypted cache or prompt the user for the credentials.
 ---@param site_name string The name of the site to get the credentials for.
+---@param username string? The username to use. If not given, will prompt the user on the current terminal. Ignored if an entry already exists.
+---@param password string? The password to use. If not given, will prompt the user on the current terminal. Ignored if an entry already exists.
+---@param expiry integer? The expiry date for the credentials (utc timestamp). If not given, will prompt the user on the current terminal.
+---@param passphrase string? The passphrase to use for the encryption. If not given, will prompt the user on the current terminal.
+---@param no_output boolean? Whether to suppress ALL output to the terminal. If true, will return false if any user input is required (i.e: missing fields).
 ---@return boolean ok Whether the operation was successful.
 ---@return string? username The username for the site.
 ---@return string? password The password for the site.
-function credential_store.get_user_pass(site_name)
+function credential_store.get_user_pass(site_name, username, password, expiry, passphrase, no_output)
   expect(1, site_name, "string")
+  expect(2, username, "string", "nil")
+  expect(3, password, "string", "nil")
+  expect(4, expiry, "number", "nil")
+  expect(5, passphrase, "string", "nil")
+  expect(6, no_output, "boolean", "nil")
+
+  local _write = write
+  local _print = print
+  local _printError = printError
+
+  local function write(...) if not no_output then _write(...) end end
+  local function print(...) if not no_output then _print(...) end end
+  local function printError(...) if not no_output then _printError(...) end end
 
   -- First, check if we already have any cached data for this site.
   local exists = credential_store.entries.exists(site_name, credential_store.ENTRY_TYPES.USER_PASS)
@@ -489,6 +507,10 @@ function credential_store.get_user_pass(site_name)
 
   -- It exists, prompt the user for the encryption password.
   if store_enabled and exists then
+    if no_output and not passphrase then
+      return false -- cannot prompt the user for input if no_output is true.
+    end
+
     local ok, entry = credential_store.entries.get(site_name, credential_store.ENTRY_TYPES.USER_PASS) --[[@as UserPassCredentialEntry]]
 
     if not ok then
@@ -511,12 +533,12 @@ function credential_store.get_user_pass(site_name)
       )
     end
 
-    local passphrase = read_expected_passphrase(site_name, entry.salt_verification, entry.hash, 1, 2)
+    passphrase = passphrase or read_expected_passphrase(site_name, entry.salt_verification, entry.hash, 1, 2)
 
     print()
     --print("\n      Calculating encryption hash...")
     local _, y = term.getCursorPos()
-    local encryption_hash = sha256.pbkdf2(passphrase, entry.salt_encryption, PBKDF2_ROUNDS, progress(y, 2, 2))
+    local encryption_hash = sha256.pbkdf2(passphrase, entry.salt_encryption, PBKDF2_ROUNDS, no_output and function() end or progress(y, 2, 2))
 
     print("\nDecrypting credentials...")
     local username = chacha20.crypt(encryption_hash, entry.nonce_uname, entry.username, CHACHA20_ROUNDS)
@@ -525,55 +547,67 @@ function credential_store.get_user_pass(site_name)
     return true, username, password
   end
 
-  -- It doesn't exist, prompt the user for new credentials.
+  -- It doesn't exist, prompt the user for new credentials (if needed)
+  if no_output and (not username or not password or not passphrase or not expiry) then
+    return false -- cannot prompt the user for input if no_output is true.
+  end
+
   print("Please enter the username for", site_name)
   write("> ")
-  local username = read() --[[@as string]]
+  username = username or read() --[[@as string]]
 
+  -- We only need to confirm the password if it wasn't passed as an argument.
+  local _confirm_password = not password
   print("Please enter the password for", site_name)
   write("> ")
-  local password = read("*") --[[@as string]]
+  password = password or read("*") --[[@as string]]
 
   -- All of this we can ignore if the store is disabled.
   if store_enabled then
-    -- Password confirmation
-    print("Confirm the password for", site_name)
-    write("> ")
-    local confirm_password = read("*") --[[@as string]]
-    if password ~= confirm_password then
-      printError("Passwords do not match.")
-      return false
+    if _confirm_password then
+      -- Password confirmation
+      print("Confirm the password for", site_name)
+      write("> ")
+      local confirm_password = read("*") --[[@as string]]
+      if password ~= confirm_password then
+        printError("Passwords do not match.")
+        return false
+      end
     end
 
     -- Passphrase
+    -- We only need to confirm the passphrase if it wasn't passed as an argument.
+    local _confirm_passphrase = not passphrase
     print("Please enter a passphrase to encrypt these credentials (32 characters max).")
     write("> ")
-    local passphrase = read("*") --[[@as string]]
+    passphrase = passphrase or read("*") --[[@as string]]
     if #passphrase > 32 then
       printError("Passphrase is too long.")
       return false
     end
 
     -- Passphrase confirmation
-    print("Please confirm the passphrase.")
-    write("> ")
-    local confirm_passphrase = read("*") --[[@as string]]
-    if passphrase ~= confirm_passphrase then
-      printError("Passphrases do not match.")
-      return false
+    if _confirm_passphrase then
+      print("Please confirm the passphrase.")
+      write("> ")
+      local confirm_passphrase = read("*") --[[@as string]]
+      if passphrase ~= confirm_passphrase then
+        printError("Passphrases do not match.")
+        return false
+      end
     end
 
     -- Hash encryption key.
     print("      Hashing passphrase...")
     local salt_verification = random.random(PBKDF2_SALT_SIZE)
     local _, y = term.getCursorPos()
-    local hash_verification = sha256.pbkdf2(passphrase, salt_verification, PBKDF2_ROUNDS, progress(y, 1, 2))
+    local hash_verification = sha256.pbkdf2(passphrase, salt_verification, PBKDF2_ROUNDS, no_output and function() end or progress(y, 1, 2))
     local nonce_uname = random.random(CHACHA20_NONCE_SIZE)
     local nonce_pass = random.random(CHACHA20_NONCE_SIZE)
 
     -- Hash verification key.
     local salt_encryption = random.random(PBKDF2_SALT_SIZE)
-    local encryption_hash = sha256.pbkdf2(passphrase, salt_encryption, PBKDF2_ROUNDS, progress(y, 2, 2))
+    local encryption_hash = sha256.pbkdf2(passphrase, salt_encryption, PBKDF2_ROUNDS, no_output and function() end or progress(y, 2, 2))
 
     -- Actually encrypt the credentials.
     print("\nEncrypting credentials...")
@@ -594,7 +628,7 @@ function credential_store.get_user_pass(site_name)
       type = credential_store.ENTRY_TYPES.USER_PASS,
 
       created = os.epoch "utc",
-      expiry = read_expiry_date(),
+      expiry = expiry or read_expiry_date(),
     }
 
     -- Save the credentials.
@@ -607,10 +641,25 @@ end
 
 --- Get an authentication token for a site.
 ---@param site_name string The name of the site to get the token for.
+---@param token string? The token to use. If not given, will prompt the user on the current terminal. Ignored if an entry already exists.
+---@param passphrase string? The passphrase to use for the encryption. If not given, will prompt the user on the current terminal.
+---@param expiry integer? The expiry date for the token (utc timestamp). If not given, will prompt the user on the current terminal.
+---@param no_output boolean? Whether to suppress ALL output to the terminal. If true, will return false if any user input is required (i.e: missing fields).
 ---@return boolean ok Whether the operation was successful.
 ---@return string? token The authentication token for the site.
-function credential_store.get_token(site_name)
+function credential_store.get_token(site_name, token, passphrase, expiry, no_output)
   expect(1, site_name, "string")
+  expect(2, token, "string", "nil")
+  expect(3, passphrase, "string", "nil")
+  expect(4, no_output, "boolean", "nil")
+
+  local _write = write
+  local _print = print
+  local _printError = printError
+
+  local function write(...) if not no_output then _write(...) end end
+  local function print(...) if not no_output then _print(...) end end
+  local function printError(...) if not no_output then _printError(...) end end
 
   -- First, check if we already have any cached data for this site.
   local exists = credential_store.entries.exists(site_name, credential_store.ENTRY_TYPES.TOKEN)
@@ -618,6 +667,10 @@ function credential_store.get_token(site_name)
 
   -- It exists, prompt the user for the encryption password.
   if store_enabled and exists then
+    if no_output and not passphrase then
+      return false -- cannot prompt the user for input if no_output is true.
+    end
+
     local ok, entry = credential_store.entries.get(site_name, credential_store.ENTRY_TYPES.TOKEN) --[[@as TokenCredentialEntry]]
 
     if not ok then
@@ -640,12 +693,12 @@ function credential_store.get_token(site_name)
       )
     end
 
-    local passphrase = read_expected_passphrase(site_name, entry.salt_verification, entry.hash, 1, 2)
+    passphrase = passphrase or read_expected_passphrase(site_name, entry.salt_verification, entry.hash, 1, 2)
 
     print()
     --print("\n      Calculating encryption hash...")
     local _, y = term.getCursorPos()
-    local encryption_hash = sha256.pbkdf2(passphrase, entry.salt_encryption, PBKDF2_ROUNDS, progress(y, 2, 2))
+    local encryption_hash = sha256.pbkdf2(passphrase, entry.salt_encryption, PBKDF2_ROUNDS, no_output and function() end or progress(y, 2, 2))
 
     print("\nDecrypting token...")
     local token = chacha20.crypt(encryption_hash, entry.nonce_token, entry.token, CHACHA20_ROUNDS)
@@ -654,40 +707,47 @@ function credential_store.get_token(site_name)
   end
 
   -- It doesn't exist, prompt the user for new credentials.
+  if no_output and (not token or not passphrase or not expiry) then
+    return false -- cannot prompt the user for input if no_output is true.
+  end
   print("Please paste the authentication token for", site_name)
   write("> ")
-  local token = read() --[[@as string]]
+  token = token or read() --[[@as string]]
 
   -- All of this we can ignore if the store is disabled.
   if store_enabled then
     -- Passphrase
+    local _confirm_passphrase = not passphrase
     print("Please enter a passphrase to encrypt this token (32 characters max).")
     write("> ")
-    local passphrase = read("*") --[[@as string]]
+    passphrase = passphrase or read("*") --[[@as string]]
     if #passphrase > 32 then
       printError("Passphrase is too long.")
       return false
     end
 
     -- Passphrase confirmation
-    print("Please confirm the passphrase.")
-    write("> ")
-    local confirm_passphrase = read("*") --[[@as string]]
-    if passphrase ~= confirm_passphrase then
-      printError("Passphrases do not match.")
-      return false
+    -- We only need to confirm the passphrase if it wasn't passed as an argument.
+    if _confirm_passphrase then
+      print("Please confirm the passphrase.")
+      write("> ")
+      local confirm_passphrase = read("*") --[[@as string]]
+      if passphrase ~= confirm_passphrase then
+        printError("Passphrases do not match.")
+        return false
+      end
     end
 
     -- Hash encryption key.
     print("      Hashing passphrase...")
     local salt_verification = random.random(PBKDF2_SALT_SIZE)
     local _, y = term.getCursorPos()
-    local hash_verification = sha256.pbkdf2(passphrase, salt_verification, PBKDF2_ROUNDS, progress(y, 1, 2))
+    local hash_verification = sha256.pbkdf2(passphrase, salt_verification, PBKDF2_ROUNDS, no_output and function() end or progress(y, 1, 2))
     local nonce_token = random.random(CHACHA20_NONCE_SIZE)
 
     -- Hash verification key.
     local salt_encryption = random.random(PBKDF2_SALT_SIZE)
-    local encryption_hash = sha256.pbkdf2(passphrase, salt_encryption, PBKDF2_ROUNDS, progress(y, 2, 2))
+    local encryption_hash = sha256.pbkdf2(passphrase, salt_encryption, PBKDF2_ROUNDS, no_output and function() end or progress(y, 2, 2))
 
     -- Actually encrypt the token.
     print("\nEncrypting token...")
@@ -705,7 +765,7 @@ function credential_store.get_token(site_name)
       type = credential_store.ENTRY_TYPES.TOKEN,
 
       created = os.epoch "utc",
-      expiry = read_expiry_date()
+      expiry = expiry or read_expiry_date()
     }
 
     -- Save the credentials.
