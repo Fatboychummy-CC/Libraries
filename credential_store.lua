@@ -12,10 +12,10 @@ local expect = require "cc.expect".expect
 local chacha20 = require "ccryptolib.chacha20"
 local sha256 = require "ccryptolib.sha256"
 local random = require "ccryptolib.random"
-local file_helper = (function() -- Minified from https://github.com/Fatboychummy-CC/Libraries/blob/main/file_helper.lua
+local filesystem = (function() -- Minified from https://github.com/Fatboychummy-CC/Libraries/blob/main/file_helper.lua
   ---@diagnostic disable-next-line
-  local a=require"cc.expect".expect;local b={working_directory=fs.getDir(shell.getRunningProgram())}function b:get_lines(c,d)if type(self)~="table"then d=c;c=self;self=b end;a(1,c,"string")a(2,d,"table","nil")local e={}if not fs.exists(fs.combine(self.working_directory,c))then return d or{n=0}end;for f in io.lines(fs.combine(self.working_directory,c))do table.insert(e,f)end;e.n=#e;return e end;function b:get_all(c,d)if type(self)~="table"then d=c;c=self;self=b end;a(1,c,"string")a(2,d,"string","nil")local g=io.open(fs.combine(self.working_directory,c),'r')if not g then return d or""end;local h=g:read"*a"g:close()return h end;function b:write(c,h)if type(self)~="table"then h=c;c=self;self=b end;a(1,c,"string")a(2,h,"string")local g,i=io.open(fs.combine(self.working_directory,c),'w')if not g then error(("Failed to open '%s' for writing: %s"):format(fs.combine(self.working_directory,c),i),2)end;g:write(h):close()end;function b:append(c,h)if type(self)~="table"then h=c;c=self;self=b end;a(1,c,"string")a(2,h,"string")local g,i=io.open(fs.combine(self.working_directory,c),'a')if not g then error(("Failed to open '%s' for writing: %s"):format(fs.combine(self.working_directory,c),i),2)end;g:write(h):close()end;function b:empty(c)if type(self)~="table"then c=self;self=b end;a(1,c,"string","nil")c=c or""fs.delete(fs.combine(self.working_directory,c))local g,i=io.open(fs.combine(self.working_directory,c),'w')if not g then error(("Failed to open '%s' for writing: %s"):format(fs.combine(self.working_directory,c),i),2)end;g:close()end;function b:unserialize(c,d)if type(self)~="table"then d=c;c=self;self=b end;a(1,c,"string")local g=io.open(fs.combine(self.working_directory,c),'r')if not g then return d end;local h=textutils.unserialise(g:read"*a")g:close()return h end;function b:serialize(c,h,j)if type(self)~="table"then j=h;h=c;c=self;self=b end;a(1,c,"string")a(3,j,"boolean","nil")local g,i=io.open(fs.combine(self.working_directory,c),'w')if not g then error(("Failed to open '%s' for writing: %s"):format(fs.combine(self.working_directory,c),i),2)end;g:write(textutils.serialize(h,{compact=j and true or false})):close()end;function b:instanced(k)if type(self)~="table"then k=self;self=b end;local l={working_directory=fs.combine(self.working_directory,k)}return setmetatable(l,{__index=b})end;function b:exists(c)if type(self)~="table"then c=self;self=b end;a(1,c,"string","nil")c=c or""return fs.exists(fs.combine(self.working_directory,c))end;function b:delete(c)if type(self)~="table"then c=self;self=b end;a(1,c,"string","nil")c=c or""fs.delete(fs.combine(self.working_directory,c))end;function b:list(m)if type(self)~="table"then m=self;self=b end;a(1,m,"string","nil")m=m or""return fs.list(fs.combine(self.working_directory,m))end;function b:is_directory(n)if type(self)~="table"then n=self;self=b end;a(1,n,"string","nil")n=n or""return fs.isDir(fs.combine(self.working_directory,n))end;function b:open(c,o)if type(self)~="table"then c=self;o=c;self=b end;a(1,c,"string")a(2,o,"string")return fs.open(fs.combine(self.working_directory,c),o)end;function b:is_read_only(n)if type(self)~="table"then n=self;self=b end;a(1,n,"string","nil")n=n or""return fs.isReadOnly(fs.combine(self.working_directory,n))end;function b:get_dir(n)if type(self)~="table"then n=self;self=b end;a(1,n,"string","nil")n=n or""return fs.getDir(fs.combine(self.working_directory,n))end;function b:get_name(n)if type(self)~="table"then n=self;self=b end;a(1,n,"string","nil")n=n or""return fs.getName(fs.combine(self.working_directory,n))end;function b:get_size(n)if type(self)~="table"then n=self;self=b end;a(1,n,"string","nil")n=n or""return fs.getSize(fs.combine(self.working_directory,n))end;function b:get_free_space(n)if type(self)~="table"then n=self;self=b end;a(1,n,"string","nil")n=n or""return fs.getFreeSpace(fs.combine(self.working_directory,n))end;function b:make_dir(n)if type(self)~="table"then n=self;self=b end;a(1,n,"string","nil")n=n or""fs.makeDir(fs.combine(self.working_directory,n))end;function b:move(p,q)if type(self)~="table"then q=p;p=self;self=b end;a(1,p,"string")a(2,q,"string")fs.move(fs.combine(self.working_directory,p),fs.combine(self.working_directory,q))end;function b:copy(p,q)if type(self)~="table"then q=p;p=self;self=b end;a(1,p,"string")a(2,q,"string")fs.copy(fs.combine(self.working_directory,p),fs.combine(self.working_directory,q))end;return b
-end)() --[[@as file_helper]]
+  local a=require"cc.expect".expect;local b={path=""}local c={}local d;local function e(f)return setmetatable({path=f and tostring(f)or"",__SENTINEL=c},d)end;local function g(h)if h.__SENTINEL~=c then error("Filesystem objects use ':' syntax.",3)end end;local function i(j,h)if type(h)~="string"and(type(h)=="table"and h.__SENTINEL~=c)then error(("bad argument #%d (expected string or filesystem, got %s)"):format(j,type(h)),3)end end;d={__index=b,__tostring=function(self)return self.path end,__concat=function(self,k)i(2,k)return e(fs.combine(tostring(self),tostring(k)))end,__len=function(self)return#tostring(self)end}function b:at(f)g(self)i(1,f)return self..f end;function b:absolute(f)g(self)i(1,f)return e(f)end;function b:programPath()g(self)local l=fs.getDir(shell.getRunningProgram())return e(l)end;function b:file(f)g(self)i(1,f)local m=self..f;function m:readAll()g(self)local n,o=fs.open(tostring(self),"r")if not n then return nil,o end;local p=n.readAll()n.close()return p end;function m:write(q)g(self)a(1,q,"string")local n,o=fs.open(tostring(self),"w")if not n then error(o,2)end;n.write(q)n.close()end;function m:open(r)g(self)a(1,r,"string")return fs.open(tostring(self),r)end;function m:delete()g(self)fs.delete(tostring(self))end;function m:size()g(self)return fs.getSize(tostring(self))end;function m:attributes()g(self)return fs.attributes(tostring(self))end;function m:moveTo(f)g(self)i(1,f)fs.move(tostring(self),tostring(f))end;function m:copyTo(f)g(self)i(1,f)fs.copy(tostring(self),tostring(f))end;function m:touch()g(self)if not fs.exists(tostring(self))then local n,o=fs.open(tostring(self),"w")if n then n.close()return end;error(o,2)end end;function m:serialize(q,s)g(self)self:write(textutils.serialize(q,s))end;function m:unserialize(t)g(self)local p=self:readAll()if not p then return t end;return textutils.unserialize(p)end;function m:nullify()g(self)local n,o=fs.open(tostring(self),"w")if n then n.close()return end;error(o,2)end;return m end;function b:mkdir(f)g(self)i(1,f)if f then fs.makeDir(fs.combine(tostring(self),tostring(f)))else fs.makeDir(tostring(self))end end;function b:rm(f)g(self)i(1,f)if f then fs.delete(fs.combine(tostring(self),tostring(f)))else fs.delete(tostring(self))end end;function b:exists(f)g(self)i(1,f)if not f then return fs.exists(tostring(self))end;return fs.exists(fs.combine(tostring(self),tostring(f)))end;function b:isDirectory(f)g(self)i(1,f)if not f then return fs.isDir(tostring(self))end;return fs.isDir(fs.combine(tostring(self),tostring(f)))end;function b:isFile(f)g(self)i(1,f)if not f then return not fs.isDir(tostring(self))end;return not fs.isDir(fs.combine(tostring(self),tostring(f)))end;function b:list(f)g(self)i(1,f)local u;if f then u=fs.list(fs.combine(tostring(self),tostring(f)))else u=fs.list(tostring(self))end;local v={}for w,m in ipairs(u)do table.insert(v,self:file(m))end;return v end;function b:parent()g(self)return e(fs.getDir(tostring(self)))end;return e()
+end)():programPath() --[[@as FS_Root]]
 
 local errors = (function() -- Minified from https://github.com/Fatboychummy-CC/Libraries/blob/main/errors.lua
   ---@diagnostic disable-next-line
@@ -29,7 +29,7 @@ local PBKDF2_SALT_SIZE = 128
 local CHACHA20_ROUNDS = 20
 local CHACHA20_NONCE_SIZE = 12
 
-local credential_directory = file_helper:instanced(".credential_store")
+local credential_directory = filesystem:at(".credential_store")
 
 ---@class CredentialEntry
 ---@field site_name string The name of the site.
@@ -277,7 +277,7 @@ function credential_store.enable_credential_store()
   end
 
   -- The user has confirmed, delete the disabled file.
-  credential_directory:delete(".disabled")
+  credential_directory:file(".disabled"):delete()
 
   return true
 end
@@ -312,11 +312,11 @@ function credential_store.disable_credential_store()
 
   -- Delete all the other files in the store.
   for _, file in ipairs(credential_directory:list()) do
-    credential_directory:delete(file)
+    file:delete()
   end
 
   -- Create the empty file to indicate that the store is disabled.
-  credential_directory:empty(".disabled")
+  credential_directory:file(".disabled"):touch()
 
   print("All stored credentials have been removed, and the credential store has been disabled.")
 
@@ -382,7 +382,7 @@ function credential_store.entries.remove(site_name, entry_type)
   end
 
   -- Actually delete the entry.
-  credential_directory:delete(_entry_filename(site_name, entry_type))
+  credential_directory:file(_entry_filename(site_name, entry_type)):delete()
 
   return true
 end
@@ -420,7 +420,7 @@ function credential_store.entries.get(site_name, entry_type)
   end
 
   -- Actually get the entry.
-  local entry = credential_directory:unserialize(_entry_filename(site_name, entry_type))
+  local entry = credential_directory:file(_entry_filename(site_name, entry_type)):unserialize()
 
   if not entry then
     errors.InternalError(
@@ -441,7 +441,7 @@ function credential_store.entries.get_all()
   local entries = {}
 
   for _, file in ipairs(files) do
-    local entry = credential_directory:unserialize(file) --[[@as CredentialEntry]]
+    local entry = file:unserialize(file) --[[@as CredentialEntry]]
 
     if not entry then
       errors.InternalError(
@@ -470,7 +470,7 @@ function credential_store.entries.write(site_name, entry_type, entry)
   _entry_type_valid(entry_type, "This is a bug in the caller of `entries.write`.")
 
   -- Actually add the entry.
-  credential_directory:serialize(_entry_filename(site_name, entry_type), entry, true)
+  credential_directory:file(_entry_filename(site_name, entry_type)):serialize(entry, {compact=true})
 
   return true
 end
