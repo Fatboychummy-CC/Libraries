@@ -34,9 +34,10 @@ local function blit_print(text, text_color, back_color, printed, level)
   local old = term.redirect(log_window)
   local old_c = term.getTextColor()
   term.setTextColor(
-    level == logging.LOG_LEVEL.WARN and colors.orange
-      or level == logging.LOG_LEVEL.ERROR and colors.red
-      or colors.white
+    level == logging.LOG_LEVEL.DEBUG and colors.lightGray
+    or level == logging.LOG_LEVEL.WARN and colors.orange
+    or level == logging.LOG_LEVEL.ERROR and colors.red
+    or colors.white
   )
   print(printed)
   term.setTextColor(old_c)
@@ -117,10 +118,24 @@ function logging.create_context(name)
     log(name, logging.LOG_LEVEL.DEBUG, "DEBUG", ...)
   end
 
+  --- Send a debug message, formatted, to the log.
+  ---@param fmt string The format string.
+  ---@param ... any The values to be included in the log. Concatenated with a space.
+  function context.debugf(fmt, ...)
+    context.debug(fmt:format(...))
+  end
+
   --- Send an informational message to the log.
   ---@param ... any The values to be included in the log. Concatenated with a space.
   function context.info(...)
     log(name, logging.LOG_LEVEL.INFO, "INFO", ...)
+  end
+
+  --- Send an informational message, formatted, to the log.
+  ---@param fmt string The format string.
+  ---@param ... any The values to be included in the log. Concatenated with a space.
+  function context.infof(fmt, ...)
+    context.info(fmt:format(...))
   end
 
   --- Send a warning to the log.
@@ -130,6 +145,13 @@ function logging.create_context(name)
     warned = true
   end
 
+  --- Send a warning, formatted, to the log.
+  ---@param fmt string The format string.
+  ---@param ... any The values to be included in the log. Concatenated with a space.
+  function context.warnf(fmt, ...)
+    context.warn(fmt:format(...))
+  end
+
   --- Send an error to the log.
   ---@param ... any The values to be included in the log. Concatenated with a space.
   function context.error(...)
@@ -137,9 +159,25 @@ function logging.create_context(name)
     errored = true
   end
 
+  --- Send an error, formatted, to the log.
+  ---@param fmt string The format string.
+  ---@param ... any The values to be included in the log. Concatenated with a space.
+  function context.errorf(fmt, ...)
+    context.error(fmt:format(...))
+  end
+
+  --- Send a fatal error to the log.
+  ---@param ... any The values to be included in the log. Concatenated with a space.
   function context.fatal(...)
     log(name, logging.LOG_LEVEL.FATAL, "FATAL", ...)
     errored = true
+  end
+
+  --- Send a fatal error, formatted, to the log.
+  ---@param fmt string The format string.
+  ---@param ... any The values to be included in the log. Concatenated with a space.
+  function context.fatalf(fmt, ...)
+    context.fatal(fmt:format(...))
   end
 
   return setmetatable(context, logging)
