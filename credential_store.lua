@@ -712,7 +712,7 @@ function credential_store.get_token(site_name, token, passphrase, expiry, no_out
   end
   print("Please paste the authentication token for", site_name)
   write("> ")
-  token = token or read() --[[@as string]]
+  token = token or read("*") --[[@as string]]
 
   -- All of this we can ignore if the store is disabled.
   if store_enabled then
