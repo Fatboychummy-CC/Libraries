@@ -145,6 +145,23 @@ function filesystem:file(path)
     handle.close()
   end
 
+  --- Append data to the file. This method will create the file if it doesn't
+  --- exist.
+  ---@param data string The data to append to the file.
+  function file:append(data)
+    sentinel(self)
+    expect(1, data, "string")
+
+    local handle, err = fs.open(tostring(self), "a")
+    if not handle then
+      ---@cast err string
+      error(err, 2)
+    end
+
+    handle.write(data)
+    handle.close()
+  end
+
   --- Open the file in the given mode.
   ---@param mode "r"|"rb"|"w"|"wb"|"a"|"ab" The mode to open the file in.
   ---@return ReadHandle|BinaryReadHandle|WriteHandle|BinaryWriteHandle? handle The file handle.
