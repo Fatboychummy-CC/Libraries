@@ -124,7 +124,7 @@ end
 
 --- Reset the color palette to the default.
 function catppuccin.reset_palette()
-  for i = 0, 16 do
+  for i = 0, 15 do
     term.setPaletteColor(2^i, term.nativePaletteColor(2^i))
   end
 end
