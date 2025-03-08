@@ -77,6 +77,24 @@ local catppuccin_palettes = {
   },
 }
 
+---@class catppuccin_palette
+---@field crust integer
+---@field mantle integer
+---@field base integer
+---@field surface_0 integer
+---@field surface_1 integer
+---@field surface_2 integer
+---@field overlay_0 integer
+---@field overlay_1 integer
+---@field overlay_2 integer
+---@field subtext_0 integer
+---@field subtext_1 integer
+---@field text integer
+---@field red integer
+---@field green integer
+---@field blue integer
+---@field yellow integer
+
 ---@class catppuccin
 local catppuccin = {}
 
@@ -84,7 +102,7 @@ local catppuccin = {}
 
 --- Set the color palette to Catppuccin.
 ---@param name "mocha"|"macchiato"|"frappe"|"latte" The name of the palette to use.
----@return palette palette The new palette to use.
+---@return catppuccin_palette palette The new palette to use.
 function catppuccin.set_palette(name)
   expect(1, name, "string")
 
