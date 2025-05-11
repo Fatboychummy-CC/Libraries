@@ -41,6 +41,8 @@ for k, v in pairs(LOG_LEVELS) do
   LEVELS_LOG[v] = k
 end
 
+---@type table<string, true>
+local disabled_origins = {}
 
 
 -- Split line by newlines, including double-newlines.
@@ -77,6 +79,10 @@ local function log(level, origin, ...)
   expect(2, origin, "string")
 
   if level < LOG_LEVEL then
+    return
+  end
+
+  if disabled_origins[origin] then
     return
   end
 
@@ -218,6 +224,22 @@ function minilogger.set_colors(colors)
   expect(1, colors, "table")
 
   _colors = colors
+end
+
+--- Disables a source of logging.
+---@param origin string The logger to disable.
+function minilogger.disable(origin)
+  expect(1, origin, "string")
+
+  disabled_origins[origin] = true
+end
+
+--- Enables a source of logging.
+---@param origin string The logger to enable.
+function minilogger.enable(origin)
+  expect(1, origin, "string")
+
+  disabled_origins[origin] = nil
 end
 
 return minilogger
