@@ -197,9 +197,9 @@ local catppuccin_palettes = {
 --- - yellow
 --- 
 --- By default, the other colors are not included, and the Lua Language Server will warn you about this.
---- If you are altering the included palette, you will want to use the `full_catpuccin_palette` type:
+--- If you are altering the included palette, you will want to use the `full_catppuccin_palette` type:
 --- ```lua
---- ---@type full_catpuccin_palette
+--- ---@type full_catppuccin_palette
 --- local palette = catppuccin.set_palette("mocha", "rosewater", "flamingo", "pink", "mauve")
 --- ```
 --- Be warned that this type includes all the colors, but they don't all necessarily exist in the palette. You will
@@ -232,7 +232,7 @@ local catppuccin_palettes = {
 ---@field sapphire integer?
 ---@field lavender integer?
 
----@class full_catpuccin_palette : base_catppuccin_palette
+---@class full_catppuccin_palette : base_catppuccin_palette
 ---@field rosewater integer Cursor
 ---@field flamingo integer
 ---@field pink integer
@@ -313,11 +313,11 @@ function catppuccin.set_palette(name, ...)
   --- This is most useful when you don't need one of the control colors, and want to replace it with one of the additional colors.
   --- For example, if you know you will never use `overlay_2`, you can replace it with `rosewater`:
   --- ```lua
-  --- ---@type full_catpuccin_palette
+  --- ---@type full_catppuccin_palette
   --- local palette = catppuccin.set_palette("mocha")
   --- palette.replace("overlay_2", "rosewater")
   --- 
-  --- -- Don't forget to use the `full_catpuccin_palette` type! This will remove some warnings if you're altering the palette.
+  --- -- Don't forget to use the `full_catppuccin_palette` type! This will remove some warnings if you're altering the palette.
   --- ```
   ---@param old_name base_color_name|additional_color_name The name of the color to replace.
   ---@param new_name base_color_name|additional_color_name The name of the new color.
