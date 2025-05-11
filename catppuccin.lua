@@ -100,8 +100,14 @@ local catppuccin = {}
 
 ---@alias palette table<string, color>
 
+---@alias catppuccin_palette_name
+---| "mocha" # Original, darkest palette.
+---| "macchiato" # Medium contrast dark palette.
+---| "frappe" # Light theme with subdued colors.
+---| "latte" # Lightest theme.
+
 --- Set the color palette to Catppuccin.
----@param name "mocha"|"macchiato"|"frappe"|"latte" The name of the palette to use.
+---@param name catppuccin_palette_name The name of the palette to use.
 ---@return catppuccin_palette palette The new palette to use.
 function catppuccin.set_palette(name)
   expect(1, name, "string")
