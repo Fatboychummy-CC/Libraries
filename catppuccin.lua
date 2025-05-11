@@ -66,6 +66,10 @@ local additional_colors = {
 ---| "sky"
 ---| "sapphire"
 ---| "lavender"
+---| "red"
+---| "green"
+---| "blue"
+---| "yellow"
 
 local catppuccin_palettes = {
   mocha = {
@@ -295,9 +299,11 @@ function catppuccin.set_palette(name, ...)
 
   for color_name in pairs(base_colors) do
     if i > 15 then break end
-    term.setPaletteColor(2^i, catppuccin_palettes[name][color_name])
-    palette[color_name] = 2^i
-    i = i + 1
+    if not palette[color_name] then -- Only register colors that are not already in the palette.
+      term.setPaletteColor(2^i, catppuccin_palettes[name][color_name])
+      palette[color_name] = 2^i
+      i = i + 1
+    end
   end
 
   --- Replace a color in the palette with a new color in the palette.
