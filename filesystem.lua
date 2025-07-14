@@ -1,11 +1,9 @@
 --- A better alternative to the file_helper library. Each returned object is a
 --- "file" object, that can be further used in other functions.
---- 
+---
 --- This library is a wrapper around the `fs` library, and provides a more
 --- object-oriented approach to working with files and directories. It is very
 --- quick and intuitive to use.
---- 
---- 
 
 local expect = require "cc.expect".expect
 
@@ -17,7 +15,8 @@ local expect = require "cc.expect".expect
 ---@operator concat(FS_FilePath): FS_Root
 ---@operator len: integer
 local filesystem = {
-  path = ""
+  path = "",
+  __SENTINEL = {}
 }
 
 local ROOT_SENTINEL = {}
@@ -27,8 +26,7 @@ local root_metatable
 ---@param path FS_FilePath? The path to the file.
 local function new(path)
   return setmetatable({
-    path = path and tostring(path) or "",
-    __SENTINEL = ROOT_SENTINEL
+    path = path and tostring(path) or ""
   }, root_metatable)
 end
 
@@ -64,11 +62,11 @@ root_metatable = {
 
 --- Create an object instance based on the path. This method *extends* the
 --- current path (i.e: `self.path .. path`), unless the given path is absolute.
---- 
+---
 --- Works the same as concatenating a filesystem object with a string (or
 --- another filesystem object).
---- 
---- 
+---
+---
 ---@param path FS_FilePath The path to the file.
 ---@return FS_Root instance The object instance.
 function filesystem:at(path)
@@ -98,7 +96,6 @@ function filesystem:programPath()
 end
 
 --- Get a file object for a given filename within the instance directory.
----@todo this``
 ---@param path FS_FilePath The path to the file.
 ---@return FS_File file The file object.
 function filesystem:file(path)
@@ -164,12 +161,12 @@ function filesystem:file(path)
 
   --- Open the file in the given mode.
   ---@param mode "r"|"rb"|"w"|"wb"|"a"|"ab" The mode to open the file in.
-  ---@return ReadHandle|BinaryReadHandle|WriteHandle|BinaryWriteHandle? handle The file handle.
+  ---@return ccTweaked.fs.ReadHandle|ccTweaked.fs.BinaryReadHandle|ccTweaked.fs.WriteHandle|ccTweaked.fs.BinaryWriteHandle? handle The file handle.
   ---@return string? error The error message if the file could not be opened.
-  ---@overload fun(mode: "r"):ReadHandle?, string?
-  ---@overload fun(mode: "rb"):BinaryReadHandle?, string?
-  ---@overload fun(mode: "w"|"a"):WriteHandle?, string?
-  ---@overload fun(mode: "wb"|"ab"):BinaryWriteHandle?, string?
+  ---@overload fun(mode: "r"):ccTweaked.fs.ReadHandle?, string?
+  ---@overload fun(mode: "rb"):ccTweaked.fs.BinaryReadHandle?, string?
+  ---@overload fun(mode: "w"|"a"):ccTweaked.fs.WriteHandle?, string?
+  ---@overload fun(mode: "wb"|"ab"):ccTweaked.fs.BinaryWriteHandle?, string?
   ---@nodiscard
   function file:open(mode)
     sentinel(self)
@@ -194,7 +191,7 @@ function filesystem:file(path)
   end
 
   --- Get the attributes of the file
-  ---@return fileAttributes attributes The attributes of the file.
+  ---@return ccTweaked.fs.fileAttributes attributes The attributes of the file.
   function file:attributes()
     sentinel(self)
     return fs.attributes(tostring(self))
