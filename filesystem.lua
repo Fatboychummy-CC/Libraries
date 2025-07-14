@@ -96,11 +96,12 @@ function filesystem:programPath()
 end
 
 --- Get a file object for a given filename within the instance directory.
----@param path FS_FilePath The path to the file.
+---@param path FS_FilePath? The path to the file.
 ---@return FS_File file The file object.
 function filesystem:file(path)
   sentinel(self)
   sentinel_other(1, path)
+  path = path or ""
 
   --- An instance of a file object. This object refers to a literal file or
   --- directory on the filesystem.
