@@ -18,8 +18,6 @@ local filesystem = {
   path = "",
   __SENTINEL = {}
 }
-
-local ROOT_SENTINEL = {}
 local root_metatable
 
 --- Create a new instance of the filesystem object.
@@ -31,13 +29,13 @@ local function new(path)
 end
 
 local function sentinel(obj)
-  if obj.__SENTINEL ~= ROOT_SENTINEL then
+  if obj.__SENTINEL ~= filesystem.__SENTINEL then
     error("Filesystem objects use ':' syntax.", 3)
   end
 end
 
 local function sentinel_other(arg_index, obj)
-  if type(obj) ~= "string" and (type(obj) == "table" and obj.__SENTINEL ~= ROOT_SENTINEL) then
+  if type(obj) ~= "string" and (type(obj) == "table" and obj.__SENTINEL ~= filesystem.__SENTINEL) then
     error(
       ("bad argument #%d (expected string or filesystem, got %s)"):format(arg_index, type(obj)),
       3
