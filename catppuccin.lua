@@ -190,62 +190,10 @@ local catppuccin_palettes = {
   },
 }
 
---- The base Catppuccin palette. By default, comes with all the 'control' colors, and four of the 'additional' colors:
---- - red
---- - green
---- - blue
---- - yellow
---- 
---- By default, the other colors are not included, and the Lua Language Server will warn you about this.
---- If you are altering the included palette, you will want to use the `full_catppuccin_palette` type:
---- ```lua
---- ---@type full_catppuccin_palette
---- local palette = catppuccin.set_palette("mocha", "rosewater", "flamingo", "pink", "mauve")
---- ```
---- Be warned that this type includes all the colors, but they don't all necessarily exist in the palette. You will
---- need to track the colors you are using yourself.
----@class base_catppuccin_palette
----@field base integer Background panes
----@field crust integer Secondary panes
----@field mantle integer Secondary panes
----@field surface_0 integer Surface elements
----@field surface_1 integer Surface elements
----@field surface_2 integer Surface elements
----@field overlay_0 integer Overlay elements
----@field overlay_1 integer Overlay elements, subtle text
----@field overlay_2 integer Overlay elements, selection background (20-30% opacity)
----@field subtext_0 integer Sub-headlines/labels
----@field subtext_1 integer Sub-headlines/labels
----@field text integer Body copy, main headline.
----@field red integer Errors
----@field green integer Success
----@field blue integer Tags, Pills
----@field yellow integer Warnings
----@field rosewater integer? Cursor
----@field flamingo integer?
----@field pink integer?
----@field mauve integer?
----@field maroon integer?
----@field peach integer?
----@field teal integer?
----@field sky integer?
----@field sapphire integer?
----@field lavender integer?
-
----@class full_catppuccin_palette : base_catppuccin_palette
----@field rosewater integer Cursor
----@field flamingo integer
----@field pink integer
----@field mauve integer
----@field maroon integer
----@field peach integer
----@field teal integer
----@field sky integer
----@field sapphire integer
----@field lavender integer
-
 ---@class catppuccin
 local catppuccin = {}
+
+---@alias color integer
 
 ---@alias palette table<string, color>
 
@@ -278,6 +226,62 @@ function catppuccin.set_palette(name, ...)
   end
 
   local i = 0
+
+
+
+  ---@class full_catppuccin_palette : base_catppuccin_palette
+  ---@field rosewater integer Cursor
+  ---@field flamingo integer
+  ---@field pink integer
+  ---@field mauve integer
+  ---@field maroon integer
+  ---@field peach integer
+  ---@field teal integer
+  ---@field sky integer
+  ---@field sapphire integer
+  ---@field lavender integer
+
+  --- The base Catppuccin palette. By default, comes with all the 'control' colors, and four of the 'additional' colors:
+  --- - red
+  --- - green
+  --- - blue
+  --- - yellow
+  ---
+  --- By default, the other colors are not included, and the Lua Language Server will warn you about this.
+  --- If you are altering the included palette, you will want to use the `full_catppuccin_palette` type:
+  --- ```lua
+  --- ---@type full_catppuccin_palette
+  --- local palette = catppuccin.set_palette("mocha", "rosewater", "flamingo", "pink", "mauve")
+  --- ```
+  --- Be warned that this type includes all the colors, but they don't all necessarily exist in the palette. You will
+  --- need to track the colors you are using yourself.
+  ---@class base_catppuccin_palette
+  ---@field base integer Background panes
+  ---@field crust integer Secondary panes
+  ---@field mantle integer Secondary panes
+  ---@field surface_0 integer Surface elements
+  ---@field surface_1 integer Surface elements
+  ---@field surface_2 integer Surface elements
+  ---@field overlay_0 integer Overlay elements
+  ---@field overlay_1 integer Overlay elements, subtle text
+  ---@field overlay_2 integer Overlay elements, selection background (20-30% opacity)
+  ---@field subtext_0 integer Sub-headlines/labels
+  ---@field subtext_1 integer Sub-headlines/labels
+  ---@field text integer Body copy, main headline.
+  ---@field red integer Errors
+  ---@field green integer Success
+  ---@field blue integer Tags, Pills
+  ---@field yellow integer Warnings
+  ---@field rosewater integer? Cursor
+  ---@field flamingo integer?
+  ---@field pink integer?
+  ---@field mauve integer?
+  ---@field maroon integer?
+  ---@field peach integer?
+  ---@field teal integer?
+  ---@field sky integer?
+  ---@field sapphire integer?
+  ---@field lavender integer?
   local palette = {}
 
   for color_name in pairs(base_palette) do
@@ -307,16 +311,16 @@ function catppuccin.set_palette(name, ...)
   end
 
   --- Replace a color in the palette with a new color in the palette.
-  --- 
+  ---
   --- This directly removes the old color from the palette, then adds a new key with the new color's name.
-  --- 
+  ---
   --- This is most useful when you don't need one of the control colors, and want to replace it with one of the additional colors.
   --- For example, if you know you will never use `overlay_2`, you can replace it with `rosewater`:
   --- ```lua
   --- ---@type full_catppuccin_palette
   --- local palette = catppuccin.set_palette("mocha")
   --- palette.replace("overlay_2", "rosewater")
-  --- 
+  ---
   --- -- Don't forget to use the `full_catppuccin_palette` type! This will remove some warnings if you're altering the palette.
   --- ```
   ---@param old_name base_color_name|additional_color_name The name of the color to replace.
