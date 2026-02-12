@@ -104,6 +104,7 @@ function filesystem:file(path)
   --- An instance of a file object. This object refers to a literal file or
   --- directory on the filesystem.
   ---@class FS_File : FS_Root
+  ---@field handle ccTweaked.fs.WriteHandle? The file handle, if the file is currently open for quick-append.
   local file = self .. path
 
   --- Get the entire contents of the file.
@@ -156,6 +157,28 @@ function filesystem:file(path)
 
     handle.write(data)
     handle.close()
+  end
+
+  --- Quick-append data to the file. This method keeps the file open for appending.
+  ---@param data string The data to append to the file.
+  function file:quickAppend(data)
+    sentinel(self)
+    expect(1, data, "string")
+
+    if not self.handle then
+      local handle, err = fs.open(tostring(self), "a")
+      if not handle then
+        ---@cast err string
+        error(err, 2)
+      end
+      self.handle = handle --[[@as ccTweaked.fs.WriteHandle?]]
+    end
+
+    if not self.handle then
+      error("Failed to open file for quick appending.", 2)
+    end
+
+    self.handle.write(data)
   end
 
   --- Open the file in the given mode.
