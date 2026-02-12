@@ -65,7 +65,7 @@ local function log_to_file(level, origin, msg)
   local initial_start = ("[%s]:%s: "):format(level_name, origin)
   local initial_between = ("\n[%s]:%s| "):format(level_name, (" "):rep(#origin))
 
-  LOG_FILE:append(initial_start .. table.concat(split_lines(msg), initial_between) .. "\n")
+  LOG_FILE:quickAppend(initial_start .. table.concat(split_lines(msg), initial_between) .. "\n")
 end
 
 
