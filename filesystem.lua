@@ -181,6 +181,16 @@ function filesystem:file(path)
     self.handle.write(data)
   end
 
+  --- Closes the quickAppend handle, if it exists.
+  function file:closeQuickAppend()
+    sentinel(self)
+
+    if self.handle then
+      self.handle.close()
+      self.handle = nil
+    end
+  end
+
   --- Open the file in the given mode.
   ---@param mode "r"|"rb"|"w"|"wb"|"a"|"ab" The mode to open the file in.
   ---@return ccTweaked.fs.ReadHandle|ccTweaked.fs.BinaryReadHandle|ccTweaked.fs.WriteHandle|ccTweaked.fs.BinaryWriteHandle? handle The file handle.
