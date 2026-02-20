@@ -222,6 +222,15 @@ function filesystem:file(path)
     return fs.getSize(tostring(self))
   end
 
+  --- Get the name of the file.
+  --- Works as a wrapper around `fs.getName`.
+  ---@return string name The name of the file.
+  function file:getName()
+    sentinel(self)
+
+    return fs.getName(tostring(self))
+  end
+
   --- Get the attributes of the file
   ---@return ccTweaked.fs.fileAttributes attributes The attributes of the file.
   function file:attributes()
