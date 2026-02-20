@@ -291,6 +291,33 @@ function filesystem:file(path)
     error(err, 2)
   end
 
+  --- Run the file (by `load`ing it and executing it).
+  --- The file is run with the current environment.
+  ---@param ... any The arguments to pass to the loaded chunk.
+  ---@return any ... The return values from the loaded chunk.
+  function file:run(...)
+    sentinel(self)
+
+    local handle, err = fs.open(tostring(self), "r")
+    ---@cast handle ccTweaked.fs.ReadHandle?
+    if not handle then
+      ---@cast err string
+      error(err, 2)
+    end
+
+    local data = handle.readAll() --[[@as string]]
+    handle.close()
+
+    local chunk, load_err = load(data, tostring(self), "t", _ENV)
+
+    if not chunk then
+      ---@cast load_err string
+      error(load_err, 2)
+    end
+
+    return chunk(...)
+  end
+
   return file
 end
 
