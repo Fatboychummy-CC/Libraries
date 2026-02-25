@@ -45,8 +45,23 @@ local BLIT_CONVERT = {
   [32768] = 'f',
 }
 
+local term = term.current()
+local main_term = term
+
 ---@class display_utils-display_utils
 local dutil = {}
+
+--- Redirect output to a window, monitor, or something else.
+---@param target ccTweaked.term.Redirect|term The target to redirect output to.
+function dutil.redirect(target)
+  expect(1, target, "table")
+  term = target
+end
+
+--- Restore output to the main terminal.
+function dutil.restore()
+  term = main_term
+end
 
 --- Create a percentage bar which uses drawing characters to be higher fidelity.
 ---@param options display_utils-hfpb_options The options for the percentage bar.
