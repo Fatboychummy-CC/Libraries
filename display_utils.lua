@@ -2,6 +2,29 @@
 local _expect = require "cc.expect"
 local expect, field = _expect.expect, _expect.field
 
+---@class display_utils-hfpb_options High Fidelity Percentage Bar Options
+---@field x integer The X position of the left of the percentage bar.
+---@field y integer The Y position of the top of the percentage bar.
+---@field w integer The width of the percentage bar.
+---@field h integer The height of the percentage bar.
+---@field background ccTweaked.colors.color The color to be used for the unfilled parts of the bar.
+---@field filled ccTweaked.colors.color The color to be used for the filled parts of the bar.
+---@field current ccTweaked.colors.color The color to be used for the current fill position in the bar. This should be `value / max`.
+---@field allow_overflow boolean? Whether or not to allow the bar to fill beyond its maximum point.
+
+
+---@class display_utils-hfpb High Fidelity Percentage Bar
+---@field x integer The X position of the left of the percentage bar.
+---@field y integer The Y position of the top of the percentage bar.
+---@field w integer The width of the percentage bar.
+---@field h integer The height of the percentage bar.
+---@field background ccTweaked.colors.color The color to be used for the unfilled parts of the bar.
+---@field filled ccTweaked.colors.color The color to be used for the filled parts of the bar.
+---@field current ccTweaked.colors.color The color to be used for the current fill position in the bar.
+---@field percent number A value between 0 and 1 representing how full the bar should be. This should be `value / max`.
+---@field allow_overflow boolean Whether or not to allow the bar to fill beyond its maximum point.
+---@field draw fun() Draw this percent bar.
+
 local half_char = '\x95'
 local BLIT_CONVERT = {
   [1] = '0',
@@ -74,7 +97,7 @@ function dutil.high_fidelity_percent_bar(options)
     local fill_str = string.rep(' ', bar.w)
     local bg = BLIT_CONVERT[bar.filled]:rep(fill) .. BLIT_CONVERT[bar.background]:rep(bar.w - fill)
     local txt = BLIT_CONVERT[bar.filled]:rep(bar.w)
-    
+
     if not zero then
       if first_half then
         fill_str = replace_char_at(fill_str, fill, half_char)
@@ -108,9 +131,9 @@ end
 ---@param y integer The Y position of the top left of the box.
 ---@param w integer The width of the box.
 ---@param h integer The height of the box.
----@param color color The color of the box.
+---@param color ccTweaked.colors.color The color of the box.
 ---@param char string? The character to be drawn. Defaults to a space.
----@param text_color color? The text color to be used (useful if using `char`).
+---@param text_color ccTweaked.colors.color? The text color to be used (useful if using `char`).
 function dutil.fast_box(x, y, w, h, color, char, text_color)
   expect(1, x, "number")
   expect(2, y, "number")
