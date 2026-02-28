@@ -11,6 +11,7 @@ local expect, field = _expect.expect, _expect.field
 ---@field filled ccTweaked.colors.color The color to be used for the filled parts of the bar.
 ---@field current ccTweaked.colors.color The color to be used for the current fill position in the bar. This should be `value / max`.
 ---@field allow_overflow boolean? Whether or not to allow the bar to fill beyond its maximum point.
+---@field win ccTweaked.term.Redirect? The window to render the bar to. If nil, renders to the terminal.
 
 
 ---@class display_utils-hfpb High Fidelity Percentage Bar
@@ -23,6 +24,7 @@ local expect, field = _expect.expect, _expect.field
 ---@field current ccTweaked.colors.color The color to be used for the current fill position in the bar.
 ---@field percent number A value between 0 and 1 representing how full the bar should be. This should be `value / max`.
 ---@field allow_overflow boolean Whether or not to allow the bar to fill beyond its maximum point.
+---@field win ccTweaked.term.Redirect? The window to render the bar to.
 ---@field draw fun() Draw this percent bar.
 
 local half_char = '\x95'
@@ -45,28 +47,15 @@ local BLIT_CONVERT = {
   [32768] = 'f',
 }
 
-local term = term.current()
-local main_term = term
-
 ---@class display_utils-display_utils
 local dutil = {}
 
---- Redirect output to a window, monitor, or something else.
----@param target ccTweaked.term.Redirect|term The target to redirect output to.
-function dutil.redirect(target)
-  expect(1, target, "table")
-  term = target
-end
 
---- Restore output to the main terminal.
-function dutil.restore()
-  term = main_term
-end
 
 --- Create a percentage bar which uses drawing characters to be higher fidelity.
 ---@param options display_utils-hfpb_options The options for the percentage bar.
 ---@return display_utils-hfpb percent_bar The bar object. Use .Draw() to draw this.
-function dutil.high_fidelity_percent_bar(options)
+function dutil.high_fidelity_percent_bar(options, win)
   expect(1, options, "table")
   field(options, "x", "number")
   field(options, "y", "number")
@@ -76,6 +65,10 @@ function dutil.high_fidelity_percent_bar(options)
   field(options, "filled", "number")
   field(options, "current", "number")
   field(options, "allow_overflow", "boolean", "nil")
+  field(options, "win", "table", "nil")
+
+  -- woah, this is one easy bodge.
+  local term = options.win or term
 
   local bar = {
     x = options.x,
@@ -86,7 +79,8 @@ function dutil.high_fidelity_percent_bar(options)
     filled = options.filled,
     current = options.current,
     allow_overflow = options.allow_overflow or false,
-    percent = 0
+    percent = 0,
+    win = term,
   }
 
   local function replace_char_at(str, x, new)
@@ -141,6 +135,8 @@ function dutil.high_fidelity_percent_bar(options)
   return bar --[[@as display_utils-hfpb]]
 end
 
+
+
 --- Create a box filled with color.
 ---@param x integer The X position of the top left of the box.
 ---@param y integer The Y position of the top left of the box.
@@ -149,7 +145,8 @@ end
 ---@param color ccTweaked.colors.color The color of the box.
 ---@param char string? The character to be drawn. Defaults to a space.
 ---@param text_color ccTweaked.colors.color? The text color to be used (useful if using `char`).
-function dutil.fast_box(x, y, w, h, color, char, text_color)
+---@param win ccTweaked.term.Redirect? The window to render the box to. If nil, renders to the terminal.
+function dutil.fast_box(x, y, w, h, color, char, text_color, win)
   expect(1, x, "number")
   expect(2, y, "number")
   expect(3, w, "number")
@@ -157,6 +154,9 @@ function dutil.fast_box(x, y, w, h, color, char, text_color)
   expect(5, color, "number")
   expect(6, char, "string", "nil")
   expect(7, text_color, "number", "nil")
+  expect(8, win, "table", "nil")
+
+  local term = win or term
 
   local txt = (char or ' '):rep(w)
   local fg = (text_color and BLIT_CONVERT[text_color] or 'f'):rep(w)
@@ -167,16 +167,22 @@ function dutil.fast_box(x, y, w, h, color, char, text_color)
   end
 end
 
+
+
 --- Write text centered at the given position, or centered on the current terminal line.
 ---@param text string The text to be written.
 ---@param x integer? The x position to write at.
 ---@param y integer? The y position to write at.
-function dutil.write_centered(text, x, y)
+---@param win ccTweaked.term.Redirect? The window to write to. If nil, writes to the terminal.
+function dutil.write_centered(text, x, y, win)
   expect(1, text, "string")
   if x then
     expect(2, x, "number")
     expect(3, y, "number")
   end
+  expect(4, win, "table", "nil")
+
+  local term = win or term
 
 
   if not x then
@@ -191,5 +197,7 @@ function dutil.write_centered(text, x, y)
   term.setCursorPos(start_x, y)
   term.write(text)
 end
+
+
 
 return dutil
