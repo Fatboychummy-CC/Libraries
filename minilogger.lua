@@ -201,7 +201,7 @@ function minilogger.set_log_level(level)
 end
 
 --- Set the log window
----@param win term|Window|Redirect The new log window.
+---@param win ccTweaked.term.Redirect The new log window.
 function minilogger.set_log_window(win)
   expect(1, win, "table")
 
@@ -219,7 +219,7 @@ end
 --- - red
 --- - lightGray
 --- - black
----@param colors table<string, color> The new colors.
+---@param colors table<string, ccTweaked.colors.color> The new colors.
 function minilogger.set_colors(colors)
   expect(1, colors, "table")
 
