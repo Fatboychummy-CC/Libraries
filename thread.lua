@@ -4,6 +4,19 @@ local expect = require("cc.expect").expect
 local log = require("minilogger").new("thread")
 
 
+---@class uninit_thread
+---@field id integer The ID of the thread.
+---@field status "running"|"suspended"|"dead"|"normal" The status of the thread.
+---@field yielded string? The last event the thread has requested.
+---@field coroutine thread The coroutine of the thread. 
+---@field elevate_errors boolean Whether to elevate errors to the parent thread.
+---@field after_f function? The function to run after the thread has finished.
+---@field after_args table The arguments to pass to the function after the thread has finished.
+---@field on_error_f function? The function to run after the thread has errored.
+---@field on_error_args table The arguments to pass to the function after the thread has errored.
+---@field paused boolean Whether the thread is paused.
+---@field creator table Short information about the creator of the thread.
+
 ---@class _thread
 ---@field id integer The ID of the thread.
 ---@field status "running"|"suspended"|"dead"|"normal" The status of the thread.
@@ -115,7 +128,7 @@ end
 --- Create a new thread object.
 ---@param fn function The function to run in the thread.
 ---@param ... any The arguments to pass to the function.
----@return _thread thread The new thread object, without initializing it.
+---@return uninit_thread thread The new thread object, without initializing it.
 function _thread._create(fn, ...)
   expect(1, fn, "function")
   if type(fn) == "table" then
@@ -130,7 +143,8 @@ function _thread._create(fn, ...)
     elevate_errors = true,
     after_args = {},
     on_error_args = {},
-    paused = false
+    paused = false,
+    creator = {},
   }
 end
 
@@ -150,7 +164,7 @@ function _thread.new(fn, ...)
 
   local creator = debug.getinfo(2, "Sl")
 
-  local thread = _thread._create(fn, ...)
+  local thread = _thread._create(fn, ...) --[[@as _thread]]
   thread.creator = creator
   threads[thread.id] = thread
   log.debugf("Created new thread %d from %s:%d", thread.id, creator.short_src, creator.currentline)
@@ -239,6 +253,16 @@ end
 
 --- Stop the thread manager. Completes the current tick and then stops the thread manager.
 function _thread.stop()
+  running = false
+end
+
+
+
+--- Clears the thread manager.
+--- This will kill all threads and stop the thread manager.
+function _thread.clear()
+  log.debug("Clearing thread manager")
+  threads = {}
   running = false
 end
 
