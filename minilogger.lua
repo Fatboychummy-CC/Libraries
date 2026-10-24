@@ -51,6 +51,9 @@ local function split_lines(line)
   for l in line:gmatch("([^\n]*)\n?") do
     table.insert(lines, l)
   end
+  if lines[#lines] == "" then
+    lines[#lines] = nil
+  end
   return lines
 end
 
