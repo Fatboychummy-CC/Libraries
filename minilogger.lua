@@ -242,4 +242,9 @@ function minilogger.enable(origin)
   disabled_origins[origin] = nil
 end
 
+--- Closes the log file.
+function minilogger.close()
+  LOG_FILE:closeQuickAppend()
+end
+
 return minilogger
