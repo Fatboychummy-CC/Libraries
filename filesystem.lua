@@ -107,6 +107,35 @@ function filesystem:file(path)
   ---@field handle ccTweaked.fs.WriteHandle? The file handle, if the file is currently open for quick-append.
   local file = self .. path
 
+  --- Requires the file.
+  ---@return any ... Whatever the file returns.
+  function file:require()
+    sentinel(self)
+
+    local programRoot = self:programPath()
+    local relativePath = self.path:sub(#programRoot.path + 2) -- +2 to account for the trailing slash
+    if #relativePath == 0 then
+      error("Cannot require the root directory.", 2)
+    end
+    if relativePath:sub(-4) == ".lua" then
+      relativePath = relativePath:sub(1, -5)
+    end
+    if relativePath:match("%.") then
+      error(("File '%s' contains illegal character `.` in its path."):format(self.path), 2)
+    end
+
+    return require(relativePath)
+  end
+
+  --- Dofiles the file
+  --- Shorthand for `dofile(file.path)`. Kind of. Maybe. It's not that much shorter.
+  ---@return any ... Whatever the file returns.
+  function file:dofile()
+    sentinel(self)
+
+    return dofile(self.path)
+  end
+
   --- Get the entire contents of the file.
   ---@return string contents The contents of the file.
   ---@overload fun():nil, string Upon error.
